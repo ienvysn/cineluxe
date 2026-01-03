@@ -1,0 +1,151 @@
+@config "../tailwind.config.js";
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400...");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@layer base {
+  :root {
+    --background: 0 0% 4%;
+    --foreground: 45 20% 95%;
+
+    --card: 0 0% 7%;
+    --card-foreground: 45 20% 95%;
+
+    --popover: 0 0% 7%;
+    --popover-foreground: 45 20% 95%;
+
+    --primary: 43 74% 49%;
+    --primary-foreground: 0 0% 4%;
+
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 45 20% 90%;
+
+    --muted: 0 0% 15%;
+    --muted-foreground: 45 10% 55%;
+
+    --accent: 43 60% 40%;
+    --accent-foreground: 45 20% 95%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 45 20% 95%;
+
+    --success: 142 70% 45%;
+    --success-foreground: 0 0% 4%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 4%;
+
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 43 74% 49%;
+
+    --radius: 0.75rem;
+
+    /* Custom luxury tokens */
+    --gold: 43 74% 49%;
+    --gold-light: 43 80% 65%;
+    --gold-dark: 43 70% 35%;
+
+    --surface-glass: 0 0% 100% / 0.03;
+    --surface-elevated: 0 0% 10%;
+
+    --gradient-gold: linear-gradient(
+      135deg,
+      hsl(43, 74%, 49%),
+      hsl(38, 80%, 55%)
+    );
+    --gradient-dark: linear-gradient(180deg, hsl(0, 0%, 7%), hsl(0, 0%, 4%));
+    --gradient-card: linear-gradient(145deg, hsl(0, 0%, 9%), hsl(0, 0%, 6%));
+
+    --shadow-glow: 0 0 40px hsl(43, 74%, 49%, 0.15);
+    --shadow-elevated: 0 20px 50px -15px hsl(0, 0%, 0%, 0.7);
+    --shadow-card: 0 8px 30px -10px hsl(0, 0%, 0%, 0.5);
+
+    --font-display: "Playfair Display", serif;
+    --font-body: "Inter", sans-serif;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-body);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display);
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-card/80 backdrop-blur-xl border border-border/50 rounded-xl;
+    box-shadow: var(--shadow-card);
+  }
+
+  .gold-gradient {
+    background: var(--gradient-gold);
+  }
+
+  .text-gold-gradient {
+    background: var(--gradient-gold);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .glow-gold {
+    box-shadow: var(--shadow-glow);
+  }
+
+  .hover-lift {
+    @apply transition-all duration-300 ease-out;
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-elevated);
+  }
+
+  .seat-available {
+    @apply bg-success/20 border-2 border-success text-success hover:bg-success hover:text-success-foreground cursor-pointer transition-all duration-200;
+  }
+
+  .seat-selected {
+    @apply bg-primary border-2 border-primary text-primary-foreground;
+  }
+
+  .seat-booked {
+    @apply bg-muted/50 border-2 border-muted text-muted-foreground cursor-not-allowed;
+  }
+
+  .seat-held {
+    @apply bg-muted/30 border-2 border-muted/50 text-muted-foreground/50 cursor-not-allowed;
+  }
+
+  .status-available {
+    @apply bg-success/20 text-success border border-success/30;
+  }
+
+  .status-filling {
+    @apply bg-warning/20 text-warning border border-warning/30;
+  }
+
+  .status-almost-full {
+    @apply bg-orange-500/20 text-orange-400 border border-orange-500/30;
+  }
+
+  .status-sold-out {
+    @apply bg-destructive/20 text-destructive border border-destructive/30;
+  }
+}
