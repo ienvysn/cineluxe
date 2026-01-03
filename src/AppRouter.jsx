@@ -2,13 +2,15 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { Header } from './components/layout/Header';
+import Index from './pages/Index';
+import MovieDetail from './pages/MovieDetail';
 import AuthPage from './pages/AuthPage';
 
 // Layout with Header
 const MainLayout = ({ children }) => (
   <div className="min-h-screen flex flex-col">
     <Header />
-    <main className="flex-1 pt-16">
+    <main className="flex-1">
       {children}
     </main>
   </div>
@@ -31,11 +33,9 @@ const AdminRoute = ({ children }) => {
   return isAdmin ? children : <Navigate to="/" />;
 };
 
-// Placeholder Pages for Phase 3+
-const HomePage = () => <div className="p-20 text-center text-gold">Home Page (Coming in Phase 3)</div>;
-const MovieDetail = () => <div className="p-20 text-center text-gold">Movie Detail (Coming in Phase 4)</div>;
-const BookingPage = () => <div className="p-20 text-center text-gold">Booking Page (Coming in Phase 4)</div>;
-const AdminDashboard = () => <div className="p-20 text-center text-gold">Admin Dashboard (Coming in Phase 5)</div>;
+// Placeholder Pages for Phase 4+
+const BookingPage = () => <div className="p-20 text-center text-gold pt-32">Booking Page (Coming in Phase 4)</div>;
+const AdminDashboard = () => <div className="p-20 text-center text-gold pt-32">Admin Dashboard (Coming in Phase 5)</div>;
 
 const AppRouter = () => {
   return (
@@ -43,7 +43,7 @@ const AppRouter = () => {
       <Toaster position="top-right" expand={false} richColors />
       <Routes>
         {/* Public Routes */}
-        <Route path="/" element={<MainLayout><HomePage /></MainLayout>} />
+        <Route path="/" element={<MainLayout><Index /></MainLayout>} />
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/movie/:id" element={<MainLayout><MovieDetail /></MainLayout>} />
 
