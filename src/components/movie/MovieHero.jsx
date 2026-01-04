@@ -16,7 +16,7 @@ export const MovieHero = ({ movie, pricing, isDiscountDay }) => {
 
   return (
     <section className="relative pt-20">
-      {/* Background Backdrop */}
+
       <div className="absolute inset-0 h-[600px] md:h-[700px] overflow-hidden">
         <img
           src={movie.poster}
@@ -69,12 +69,6 @@ export const MovieHero = ({ movie, pricing, isDiscountDay }) => {
             </h1>
 
             <div className="flex flex-wrap items-center gap-8 text-muted-foreground mb-10 font-medium tracking-wide bg-white/5 w-fit px-6 py-4 rounded-2xl border border-white/5 backdrop-blur-sm">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                  <Clock className="w-5 h-5" />
-                </div>
-                <span>{formatDuration(movie.duration)}</span>
-              </div>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                   <Star className="w-5 h-5 fill-primary" />

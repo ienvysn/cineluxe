@@ -44,7 +44,7 @@ export const ComingSoonCard = ({ movie }) => {
           </div>
 
           {/* Title */}
-          <h3 className="font-display text-xl font-bold text-foreground mb-3 line-clamp-2 leading-tight group-hover:text-primary transition-colors duration-300">
+          <h3 className="font-display text-xl font-bold text-white mb-3 line-clamp-2 leading-tight group-hover:text-primary transition-colors duration-300">
             {movie.title}
           </h3>
 

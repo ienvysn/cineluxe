@@ -31,14 +31,8 @@ export const MovieCard = ({ movie }) => {
             </Badge>
           </div>
 
-          {/* Play Icon on Hover
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 transform scale-50 group-hover:scale-100">
-            <div className="w-14 h-14 rounded-full bg-primary/90 flex items-center justify-center shadow-2xl glow-gold">
-              <PlayCircle className="w-8 h-8 text-primary-foreground fill-primary-foreground" />
-            </div>
-          </div> */}
 
-          {/* Genre Badges (Slide Up) */}
+
           <div className="absolute bottom-4 left-4 right-4 flex flex-wrap gap-1.5 z-10 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 delay-75">
             {movie.genre.slice(0, 2).map((g) => (
               <Badge key={g} variant="gold" className="text-[9px] py-0.5 px-2">
@@ -55,10 +49,6 @@ export const MovieCard = ({ movie }) => {
             </h3>
 
             <div className="flex items-center gap-4 text-xs text-muted-foreground font-medium">
-              <div className="flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-primary" />
-                <span>{formatDuration(movie.duration)}</span>
-              </div>
               <div className="flex items-center gap-1.5">
                 <Star className="w-3.5 h-3.5 fill-primary text-primary" />
                 <span>{movie.language}</span>
