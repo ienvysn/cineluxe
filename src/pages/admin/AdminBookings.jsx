@@ -21,12 +21,12 @@ import {
 import { movies, screens, showtimes } from '../../data/mockData';
 import { cn } from '../../lib/utils';
 
-// Mock bookings data - ensure these work even if showtimes IDs change dynamically
+
 const mockBookings = [
   {
     id: 'BK12345',
     movieId: '1',
-    showtimeId: '1-screen-1-2024-12-03-14:00', // Example ID
+    showtimeId: '1-screen-1-2024-12-03-14:00',
     seats: ['E5', 'E6', 'E7'],
     totalAmount: 900,
     status: 'confirmed',
@@ -115,7 +115,7 @@ const AdminBookings = () => {
 
   return (
     <div className="space-y-12 animate-fade-in">
-      {/* Page Header */}
+
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
            <div className="inline-flex items-center gap-2 mb-4">
@@ -133,7 +133,7 @@ const AdminBookings = () => {
         </Button>
       </div>
 
-      {/* Overview Cards */}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
           { label: 'Total Bookings', value: bookings.length, icon: TrendingUp, color: 'text-white' },
@@ -151,7 +151,7 @@ const AdminBookings = () => {
         ))}
       </div>
 
-      {/* Filter Section */}
+
       <div className="flex flex-wrap items-center gap-4 p-6 bg-white/[0.02] border border-white/5 rounded-[28px]">
         <div className="flex-1 min-w-[300px] relative">
            <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -190,7 +190,7 @@ const AdminBookings = () => {
         </div>
       </div>
 
-      {/* Bookings List Table */}
+
       <div className="bg-[#0A0A0A] rounded-[40px] border border-white/5 overflow-hidden shadow-2xl">
         <div className="overflow-x-auto custom-scrollbar">
           <table className="w-full">
@@ -270,7 +270,7 @@ const AdminBookings = () => {
         </div>
       </div>
 
-      {/* Booking Details Dialog */}
+
       <Dialog open={isDetailDialogOpen} onOpenChange={setIsDetailDialogOpen}>
         <DialogContent className="max-w-2xl rounded-[40px] border-white/5 bg-[#070707] shadow-2xl p-0 overflow-hidden">
           {selectedBooking && (

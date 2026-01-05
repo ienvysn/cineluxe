@@ -53,7 +53,7 @@ const AdminDashboard = () => {
 
   return (
     <div className="space-y-12 animate-fade-in">
-      {/* Header section */}
+
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
            <div className="inline-flex items-center gap-2 mb-4">
@@ -75,7 +75,7 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* Stats Grid */}
+    {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
           title="Today's Bookings"
@@ -102,7 +102,7 @@ const AdminDashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Quick Stats Overview */}
+
         <div className="lg:col-span-1 space-y-6">
            <h2 className="font-display text-2xl font-bold italic mb-2 tracking-tight">Quick <span className="text-primary">Stats</span></h2>
 
@@ -141,7 +141,7 @@ const AdminDashboard = () => {
            </div>
         </div>
 
-        {/* Today's Shows */}
+
         <div className="lg:col-span-2">
            <div className="flex items-center justify-between mb-8">
               <h2 className="font-display text-2xl font-bold italic tracking-tight">Today's <span className="text-primary">Shows</span></h2>

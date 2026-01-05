@@ -37,7 +37,7 @@ const AdminMovies = () => {
   const [tmdbResults, setTmdbResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
 
-  // Form state
+
   const [formData, setFormData] = useState({
     title: '',
     poster: '',
@@ -73,7 +73,7 @@ const AdminMovies = () => {
     if (!tmdbSearch.trim()) return;
     setIsSearching(true);
 
-    // Simulated TMDB results
+
     setTimeout(() => {
       setTmdbResults([
         {
@@ -121,7 +121,7 @@ const AdminMovies = () => {
       title: formData.title,
       poster: formData.poster,
       genre: formData.genre.split(',').map((g) => g.trim()),
-      duration: 120, // Default duration if removed from UI
+      duration: 120,
       rating: formData.rating || 'PG-13',
       language: formData.language || 'English',
       synopsis: formData.synopsis,
@@ -175,7 +175,7 @@ const AdminMovies = () => {
 
   return (
     <div className="space-y-12 animate-fade-in">
-      {/* Page Header */}
+
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
            <div className="inline-flex items-center gap-2 mb-4">
@@ -192,8 +192,6 @@ const AdminMovies = () => {
           Add New Movie
         </Button>
       </div>
-
-      {/* Search Bar */}
       <div className="relative max-w-2xl group">
         <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
         <Input
@@ -204,7 +202,7 @@ const AdminMovies = () => {
         />
       </div>
 
-      {/* Movie Grid */}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
         {filteredMovies.map((movie, index) => (
           <div
@@ -253,11 +251,11 @@ const AdminMovies = () => {
         </div>
       )}
 
-      {/* Add/Edit Movie Dialog */}
+
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent className="max-w-3xl rounded-[40px] border-white/5 p-0 overflow-hidden bg-[#070707]">
           <div className="grid grid-cols-1 lg:grid-cols-5 h-full max-h-[90vh]">
-            {/* Sidebar Preview */}
+
             <div className="lg:col-span-2 bg-[#0A0A0A] p-10 flex flex-col items-center justify-center border-r border-white/5">
                 {formData.poster ? (
                   <div className="w-full">
@@ -275,7 +273,7 @@ const AdminMovies = () => {
                 )}
             </div>
 
-            {/* Form Side */}
+
             <div className="lg:col-span-3 p-10 overflow-y-auto custom-scrollbar">
               <DialogHeader className="mb-6">
                 <DialogTitle className="text-3xl font-display font-bold italic">{selectedMovie ? 'Edit' : 'Add'} <span className="text-primary italic">Movie</span></DialogTitle>
@@ -379,7 +377,6 @@ const AdminMovies = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent className="rounded-[40px] border-white/5 bg-[#0A0A0A] p-10">
           <AlertDialogHeader>

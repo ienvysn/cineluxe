@@ -67,7 +67,7 @@ const AdminValidate = () => {
 
     setIsValidating(true);
 
-    // Simulate validation delay
+
     setTimeout(() => {
       const booking = bookings.find(
         (b) => b.id.toLowerCase() === bookingId.toLowerCase() && b.pin === pin
@@ -187,7 +187,7 @@ const AdminValidate = () => {
       </div>
 
       <div className="max-w-2xl mx-auto w-full">
-        {/* Form */}
+
         <div className="glass-card p-10 relative overflow-hidden group">
            <div className="absolute top-0 right-0 p-6 opacity-5">
               <Scan className="w-32 h-32" />
@@ -245,7 +245,7 @@ const AdminValidate = () => {
            </div>
         </div>
 
-        {/* Result Area */}
+
         {validationResult !== 'idle' && resultDisplay && (
           <div
             className={cn(
@@ -312,7 +312,7 @@ const AdminValidate = () => {
                          </div>
                       </div>
 
-                      {/* Check-in Action */}
+
                       {validationResult === 'valid' && !foundBooking.checkedIn && (
                         <div className="pt-4">
                            <Button
@@ -337,7 +337,6 @@ const AdminValidate = () => {
           </div>
         )}
 
-        {/* Idle State */}
         {validationResult === 'idle' && (
           <div className="mt-10 text-center py-20 bg-white/[0.02] border border-dashed border-white/10 rounded-[40px]">
             <Scan className="w-16 h-16 text-muted-foreground/10 mx-auto mb-4" />

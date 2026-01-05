@@ -98,7 +98,7 @@ const AdminScreens = () => {
 
   return (
     <div className="space-y-12 animate-fade-in">
-      {/* Page Header */}
+
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
            <div className="inline-flex items-center gap-2 mb-4">
@@ -116,7 +116,7 @@ const AdminScreens = () => {
         </Button>
       </div>
 
-      {/* Screens Grid */}
+
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
         {screenList.map((screen) => (
           <div key={screen.id} className="glass-card group hover:border-primary/20 transition-all p-8 flex flex-col justify-between min-h-[320px]">
@@ -149,7 +149,7 @@ const AdminScreens = () => {
                </div>
              </div>
 
-             {/* Layout Preview */}
+
              <div className="mt-8 pt-8 border-t border-white/5">
                 <p className="text-[9px] uppercase tracking-widest text-muted-foreground font-bold mb-4 flex items-center gap-2">
                    <Layout className="w-3 h-3 text-primary" /> Visual Preview
@@ -168,11 +168,11 @@ const AdminScreens = () => {
         ))}
       </div>
 
-      {/* Screen Dialog */}
+
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent className="max-w-2xl rounded-[40px] border-white/5 bg-[#070707] p-0 overflow-hidden shadow-2xl">
           <div className="grid grid-cols-1 lg:grid-cols-2 h-full">
-             {/* Preview Side */}
+
              <div className="bg-[#0A0A0A] p-10 border-r border-white/5">
                 <div className="flex items-center gap-4 mb-10">
                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
@@ -182,7 +182,7 @@ const AdminScreens = () => {
                 </div>
 
                 <div className="space-y-8">
-                   {/* Virtual Screen */}
+
                    <div className="relative">
                       <div className="w-full h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent shadow-[0_0_15px_rgba(218,165,32,0.4)] rounded-full mb-8" />
                       <div className="grid gap-1.5" style={{ gridTemplateColumns: `repeat(${Math.min(formData.seatsPerRow, 15)}, minmax(0, 1fr))` }}>
@@ -196,7 +196,7 @@ const AdminScreens = () => {
                 </div>
              </div>
 
-             {/* Config Side */}
+
              <div className="p-10 space-y-8">
                 <DialogHeader>
                    <DialogTitle className="text-3xl font-display font-bold italic">{selectedScreen ? 'Edit' : 'Add'} <span className="text-primary">Screen</span></DialogTitle>

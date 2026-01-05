@@ -98,7 +98,7 @@ const AdminShowtimes = () => {
 
   return (
     <div className="space-y-12 animate-fade-in">
-      {/* Page Header */}
+
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
            <div className="inline-flex items-center gap-2 mb-4">
@@ -116,7 +116,7 @@ const AdminShowtimes = () => {
         </Button>
       </div>
 
-      {/* Control Panel (Filters) */}
+
       <div className="flex flex-wrap items-center gap-6 p-8 bg-white/[0.02] border border-white/5 rounded-[32px] shadow-xl">
         <div className="flex items-center gap-4 flex-1 min-w-[300px]">
            <Filter className="w-5 h-5 text-primary" />
@@ -143,7 +143,6 @@ const AdminShowtimes = () => {
         <Badge variant="goldOutline" className="h-10 px-6 rounded-xl uppercase tracking-widest font-bold text-[10px]">{filteredShowtimes.length} Shows Found</Badge>
       </div>
 
-      {/* Showtime List Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
         {filteredShowtimes.map((showtime) => {
           const movie = movies.find(m => m.id === showtime.movieId);
@@ -180,11 +179,10 @@ const AdminShowtimes = () => {
         )}
       </div>
 
-      {/* Add Showtime Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent className="max-w-2xl rounded-[40px] border-white/5 bg-[#070707] p-0 overflow-hidden shadow-2xl">
           <div className="grid grid-cols-1 md:grid-cols-5 min-h-[500px]">
-             {/* Left Panel */}
+
              <div className="md:col-span-2 bg-[#0A0A0A] p-10 border-r border-white/5 flex flex-col justify-center items-center text-center">
                 <div className="w-20 h-20 rounded-[30px] bg-primary/10 border border-primary/20 flex items-center justify-center text-primary mb-6">
                    <LayoutGrid className="w-10 h-10" />
@@ -193,7 +191,7 @@ const AdminShowtimes = () => {
                 <p className="text-xs text-muted-foreground font-light leading-relaxed uppercase tracking-widest px-4">Set up a single show or repeat it for multiple days.</p>
              </div>
 
-             {/* Right Panel - Form */}
+
              <div className="md:col-span-3 p-10 space-y-8 overflow-y-auto custom-scrollbar">
                 <div className="flex gap-2 p-1 bg-white/5 rounded-2xl border border-white/5">
                    <button onClick={() => setAddMode('single')} className={cn("flex-1 py-3 rounded-xl text-[10px] uppercase font-bold tracking-widest transition-all", addMode === 'single' ? "bg-primary text-black" : "text-muted-foreground hover:text-white")}>Single Show</button>

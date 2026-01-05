@@ -44,7 +44,7 @@ const MovieDetail = () => {
         isDiscountDay={isDiscountDay()}
       />
 
-      {/* Showtimes Placeholder (On Hold) */}
+
       <section className="container mx-auto px-4 py-20">
         <div className="glass-card p-12 text-center border-dashed border-white/10 opacity-50">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">

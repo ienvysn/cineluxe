@@ -61,13 +61,13 @@ const MyBookings = () => {
 
   const BookingCard = ({ booking }) => (
     <div className="group relative overflow-hidden rounded-3xl bg-card/40 border border-white/5 backdrop-blur-md transition-all duration-500 hover:border-primary/30 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.8)]">
-      {/* Ticket Pattern Overlay */}
+
       <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
         <Ticket className="w-32 h-32 rotate-12" />
       </div>
 
       <div className="flex flex-col sm:flex-row gap-6 p-6">
-        {/* Poster Wrapper */}
+
         <div className="w-full sm:w-32 flex-shrink-0 relative">
           <img
             src={booking.movie.poster}

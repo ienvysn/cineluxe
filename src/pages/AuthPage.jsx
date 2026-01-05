@@ -32,7 +32,7 @@ const AuthPage = () => {
     });
 
     if (isLogin) {
-      // Simulate successful login and redirect
+
       setTimeout(() => navigate("/"), 1500);
     }
   };
@@ -50,7 +50,7 @@ const AuthPage = () => {
 
   return (
     <div className="min-h-screen bg-background flex animate-fade-in">
-      {/* Left side - Decorative (Hidden on mobile) */}
+
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-black items-center justify-center">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-background to-background" />
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[120px] animate-glow-pulse" />
@@ -70,7 +70,7 @@ const AuthPage = () => {
         </div>
       </div>
 
-      {/* Right side - Auth form */}
+
       <div className="flex-1 flex items-center justify-center p-6 md:p-12">
         <div className="w-full max-w-md space-y-8 animate-slide-up">
           <div className="flex flex-col space-y-4">

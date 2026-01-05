@@ -19,7 +19,6 @@ const AdminPricing = () => {
   const handleSave = () => {
     setIsSaving(true);
 
-    // Simulate save
     setTimeout(() => {
       toast.success('Prices Updated', {
         description: 'Your ticket prices and discounts have been saved successfully.',
@@ -34,7 +33,7 @@ const AdminPricing = () => {
 
   return (
     <div className="space-y-12 animate-fade-in max-w-4xl mx-auto">
-      {/* Page Header */}
+
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
            <div className="inline-flex items-center gap-2 mb-4">
@@ -102,7 +101,7 @@ const AdminPricing = () => {
            </div>
         </div>
 
-        {/* Weekday Discounts Card */}
+
         <div className="glass-card p-10 space-y-8 relative overflow-hidden">
            <div className="flex items-center gap-4 mb-2">
               <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500">
@@ -145,8 +144,7 @@ const AdminPricing = () => {
         </div>
       </div>
 
-      {/* Simple Price Preview */}
-      <div className="glass-card p-8 border-white/5 overflow-hidden">
+       <div className="glass-card p-8 border-white/5 overflow-hidden">
          <div className="flex items-center gap-4 mb-6">
             <Tag className="w-5 h-5 text-primary" />
             <h2 className="text-xl font-display font-bold italic text-white tracking-widest uppercase">Price Preview</h2>
