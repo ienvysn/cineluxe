@@ -18,7 +18,16 @@ const AdminLogin = () => {
 
     setTimeout(() => {
       if (username === 'admin' && password === 'admin123') {
-        sessionStorage.setItem('adminAuthenticated', 'true');
+        const mockToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9";
+        const userData = {
+          name: 'Admin User',
+          email: 'admin@cineluxe.com',
+          role: 'admin'
+        };
+
+        localStorage.setItem('cineluxe_token', mockToken);
+        localStorage.setItem('cineluxe_user', JSON.stringify(userData));
+
         toast.success('Login Successful', {
           description: 'Welcome to the admin panel.',
         });

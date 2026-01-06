@@ -33,8 +33,9 @@ const AdminLayout = () => {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const isAuthenticated = sessionStorage.getItem('adminAuthenticated');
-    if (!isAuthenticated) {
+    const user = JSON.parse(localStorage.getItem('cineluxe_user') || '{}');
+    const token = localStorage.getItem('cineluxe_token');
+    if (!token || user.role !== 'admin') {
       navigate('/admin/login');
     }
   }, [navigate]);
@@ -52,7 +53,8 @@ const AdminLayout = () => {
   }, []);
 
   const handleLogout = () => {
-    sessionStorage.removeItem('adminAuthenticated');
+    localStorage.removeItem('cineluxe_token');
+    localStorage.removeItem('cineluxe_user');
     navigate('/admin/login');
   };
 

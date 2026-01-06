@@ -39,7 +39,7 @@ const AuthPage = () => {
     toast.success(isLogin ? "Welcome back!" : "Account created!", {
       description: isLogin
         ? "You have successfully logged in"
-        : "Please check your email to verify your account",
+        : "Welcome to CineLuxe! Your account is ready.",
     });
 
     setTimeout(() => {
@@ -48,7 +48,7 @@ const AuthPage = () => {
       } else {
         navigate("/");
       }
-    }, 1500);
+    }, 500);
   };
 
   const handleToggleMode = () => {
