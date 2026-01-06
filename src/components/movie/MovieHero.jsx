@@ -90,19 +90,7 @@ export const MovieHero = ({ movie, pricing, isDiscountDay }) => {
               </p>
             </div>
 
-            {isDiscountDay && (
-              <div className="mt-10 inline-flex items-center gap-4 px-6 py-4 rounded-2xl bg-success/10 border border-success/20 animate-pulse-slow">
-                <div className="w-12 h-12 rounded-full bg-success/20 flex items-center justify-center text-success">
-                  <Percent className="w-6 h-6" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-success font-bold text-lg uppercase tracking-tight">Luxury Offer</span>
-                  <span className="text-success/80 text-sm">
-                    Enjoy {pricing.discountPercent}% off your booking today. Excellence at a privilege.
-                  </span>
-                </div>
-              </div>
-            )}
+
           </div>
         </div>
       </div>

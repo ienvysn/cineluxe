@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { movies, pricing } from '../data/mockData';
 import { MovieHero } from '../components/movie/MovieHero';
+import { ShowtimeList } from '../components/movie/ShowtimeList';
+import { DateFilter } from '../components/movies/DateFilter';
 
 const MovieDetail = () => {
   const { id } = useParams();
@@ -37,25 +39,34 @@ const MovieDetail = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground pb-20">
+    <div className="min-h-screen bg-background text-foreground pb-32">
       <MovieHero
         movie={movie}
         pricing={pricing}
         isDiscountDay={isDiscountDay()}
       />
 
+      <div className="container mx-auto px-4 -mt-10 relative z-20">
+         {/* Date Selection Control */}
+         <div className="flex flex-col items-center mb-16">
+            <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl mb-6 shadow-2xl">
+               <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+               <span className="text-[10px] uppercase font-bold tracking-[3px] text-primary">Select Viewing Date</span>
+            </div>
+            <DateFilter
+               selectedDate={selectedDate}
+               onDateSelect={setSelectedDate}
+            />
+         </div>
 
-      <section className="container mx-auto px-4 py-20">
-        <div className="glass-card p-12 text-center border-dashed border-white/10 opacity-50">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">
-            <span className="text-xs font-bold uppercase tracking-widest text-primary">Service Update</span>
-          </div>
-          <h2 className="font-display text-3xl font-bold mb-4 italic">Showtimes on Hold</h2>
-          <p className="text-muted-foreground max-w-md mx-auto font-light leading-relaxed">
-            The booking engine and showtime scheduler are currently undergoing maintenance to enhance your experience. Please check back shortly for the final curtain call.
-          </p>
-        </div>
-      </section>
+         {/* Showtimes Section */}
+         <div className="max-w-6xl mx-auto">
+            <ShowtimeList
+               movieId={movie.id}
+               selectedDate={selectedDate}
+            />
+         </div>
+      </div>
     </div>
   );
 };

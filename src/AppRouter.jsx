@@ -7,6 +7,8 @@ import MovieDetail from './pages/MovieDetail';
 import AuthPage from './pages/AuthPage';
 import MyBookings from './pages/MyBookings';
 import BookingConfirmation from './pages/BookingConfirmation';
+import BookingPage from './pages/BookingPage';
+import PaymentPage from './pages/PaymentPage';
 import NotFound from './pages/NotFound';
 import AdminLayout from './components/admin/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -30,17 +32,16 @@ const MainLayout = ({ children }) => (
 
 // Route Guards
 const PrivateRoute = ({ children }) => {
-  const isAuthenticated = false; // Placeholder for actual auth logic
-  return isAuthenticated ? children : <Navigate to="/auth" />;
+  const token = localStorage.getItem('cineluxe_token');
+  return token ? children : <Navigate to="/auth" />;
 };
 
 const AdminRoute = ({ children }) => {
-  const isAdmin = false; // Placeholder for actual admin logic
-  return isAdmin ? children : <Navigate to="/" />;
+  const token = localStorage.getItem('cineluxe_token');
+  const user = JSON.parse(localStorage.getItem('cineluxe_user') || '{}');
+  const isAdmin = token && user.role === 'admin';
+  return isAdmin ? children : <Navigate to="/admin/login" />;
 };
-
-// Placeholder Pages for Phase 4+
-const BookingPage = () => <div className="p-20 text-center text-gold pt-32">Booking Page (Coming in Phase 4)</div>;
 
 const AppRouter = () => {
   return (
@@ -63,15 +64,24 @@ const AppRouter = () => {
             <BookingConfirmation />
           </PrivateRoute>
         } />
+        <Route path="/booking/payment" element={
+          <PrivateRoute>
+            <PaymentPage />
+          </PrivateRoute>
+        } />
         <Route path="/booking/:id" element={
           <PrivateRoute>
-            <MainLayout><BookingPage /></MainLayout>
+            <BookingPage />
           </PrivateRoute>
         } />
 
         {/* Admin Routes */}
         <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/admin" element={<AdminLayout />}>
+        <Route path="/admin" element={
+          <AdminRoute>
+            <AdminLayout />
+          </AdminRoute>
+        }>
           <Route index element={<AdminDashboard />} />
           <Route path="movies" element={<AdminMovies />} />
           <Route path="screens" element={<AdminScreens />} />
@@ -79,7 +89,6 @@ const AppRouter = () => {
           <Route path="bookings" element={<AdminBookings />} />
           <Route path="validate" element={<AdminValidate />} />
           <Route path="pricing" element={<AdminPricing />} />
-
         </Route>
 
         {/* Catch-all */}

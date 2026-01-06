@@ -49,12 +49,7 @@ const Index = () => {
                 : "translate-y-10 opacity-0"
             }`}
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-8 animate-fade-in">
-              <Sparkles className="w-4 h-4 text-primary" />
-              <span className="text-xs font-bold uppercase tracking-[2px] text-primary">
-                Experience the Extraordinary
-              </span>
-            </div>
+
 
             <h1 className="font-display text-5xl md:text-8xl font-bold mb-6 leading-[1.1] tracking-tight text-white">
               Elevating the <br />

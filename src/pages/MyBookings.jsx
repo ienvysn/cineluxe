@@ -74,9 +74,7 @@ const MyBookings = () => {
             alt={booking.movie.title}
             className="w-full aspect-[2/3] object-cover rounded-2xl shadow-xl"
           />
-          <Badge variant="gold" className="absolute -top-2 -right-2 px-2 py-1 shadow-lg">
-            {booking.status === 'confirmed' ? 'Valid' : booking.status}
-          </Badge>
+
         </div>
 
         {/* Info Area */}
@@ -91,13 +89,13 @@ const MyBookings = () => {
             <div className="grid grid-cols-2 gap-4 mt-4">
               <div className="space-y-3">
                 <div className="flex items-center gap-2.5 text-sm text-muted-foreground group-hover:text-white/80 transition-colors">
-                  <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-black transition-all duration-500">
+                  <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-primary ">
                     <Calendar className="w-4 h-4" />
                   </div>
                   <span className="font-medium">{formatDate(booking.date)}</span>
                 </div>
                 <div className="flex items-center gap-2.5 text-sm text-muted-foreground group-hover:text-white/80 transition-colors">
-                  <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-black transition-all duration-500">
+                  <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-primary ">
                     <Clock className="w-4 h-4" />
                   </div>
                   <span className="font-medium">{booking.time}</span>
@@ -105,13 +103,13 @@ const MyBookings = () => {
               </div>
               <div className="space-y-3">
                 <div className="flex items-center gap-2.5 text-sm text-muted-foreground group-hover:text-white/80 transition-colors">
-                  <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-black transition-all duration-500">
+                  <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-primary ">
                     <MapPin className="w-4 h-4" />
                   </div>
                   <span className="font-medium">{booking.screen}</span>
                 </div>
                 <div className="flex items-center gap-2.5 text-sm text-muted-foreground group-hover:text-white/80 transition-colors">
-                  <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-black transition-all duration-500">
+                  <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-primary ">
                     <Ticket className="w-4 h-4" />
                   </div>
                   <span className="truncate font-medium">{booking.seats.join(', ')}</span>
@@ -192,7 +190,7 @@ const MyBookings = () => {
           <TabsList className="w-full max-w-md gold-outline-tabs mb-12">
             <TabsTrigger value="upcoming" className="flex-1">Upcoming</TabsTrigger>
             <TabsTrigger value="past" className="flex-1">Past</TabsTrigger>
-            <TabsTrigger value="cancelled" className="flex-1">Voided</TabsTrigger>
+
           </TabsList>
 
           <TabsContent value="upcoming">

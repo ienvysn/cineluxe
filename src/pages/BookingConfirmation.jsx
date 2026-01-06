@@ -1,27 +1,70 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { Button } from '../components/ui/button';
-import { CheckCircle, Calendar, Clock, MapPin, Ticket, Copy, Download, Share2 } from 'lucide-react';
+import {
+  CheckCircle,
+  Calendar,
+  Clock,
+  MapPin,
+  Ticket,
+  Copy,
+  Download,
+  Share2,
+  Loader2,
+  AlertCircle,
+  ChevronRight
+} from 'lucide-react';
 import { toast } from 'sonner';
 
 const BookingConfirmation = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [isVerifying, setIsVerifying] = useState(true);
   const bookingData = location.state;
+
+  useEffect(() => {
+    // Simulate payment verification/ticket issuance
+    const timer = setTimeout(() => {
+      setIsVerifying(false);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, []);
 
   if (!bookingData) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
-        <div className="w-20 h-20 rounded-2xl bg-white/5 flex items-center justify-center mb-6">
-          <Ticket className="w-10 h-10 text-muted-foreground opacity-20" />
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center animate-fade-in">
+        <div className="w-24 h-24 rounded-3xl bg-destructive/10 border border-destructive/20 flex items-center justify-center mb-8">
+          <AlertCircle className="w-10 h-10 text-destructive" />
         </div>
-        <h2 className="text-2xl font-display font-bold text-white mb-2">No Reservation Found</h2>
-        <p className="text-muted-foreground mb-8 max-w-sm font-light">
-          We couldn't find your booking details. Your journey starts at the gallery.
+        <h2 className="text-3xl font-display font-bold text-white mb-3 tracking-tighter uppercase italic">Session Expired</h2>
+        <p className="text-muted-foreground mb-10 max-w-sm font-light leading-relaxed italic">
+          The cinematic experience could not be verified. Your journey starts back at the premiere gallery.
         </p>
         <Link to="/">
-          <Button variant="gold" size="xl" className="px-10">Return to Gallery</Button>
+          <Button variant="gold" size="xl" className="px-10 rounded-2xl group">
+            Revisit Gallery <ChevronRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          </Button>
         </Link>
+      </div>
+    );
+  }
+
+  if (isVerifying) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
+        <div className="relative">
+           <div className="w-32 h-32 rounded-full border-2 border-primary/20 animate-[spin_3s_linear_infinite]" />
+           <div className="w-32 h-32 rounded-full border-t-2 border-primary absolute inset-0 animate-spin" />
+           <div className="absolute inset-0 flex items-center justify-center">
+              <Loader2 className="w-8 h-8 text-primary animate-pulse" />
+           </div>
+        </div>
+        <h2 className="text-xl font-display font-bold text-white mt-8 tracking-widest uppercase italic animate-pulse">
+           Issuing <span className="text-primary italic">Digital Assets</span>
+        </h2>
+        <p className="text-muted-foreground text-[10px] uppercase font-bold tracking-[4px] mt-4 opacity-50">
+           Verifying secure transaction node...
+        </p>
       </div>
     );
   }
@@ -31,7 +74,7 @@ const BookingConfirmation = () => {
   const copyToClipboard = (text, label) => {
     navigator.clipboard.writeText(text);
     toast.success(`${label} Copied`, {
-      description: "The identifier is now in your clipboard.",
+      description: "Identifier secured in clipboard.",
     });
   };
 
@@ -41,150 +84,122 @@ const BookingConfirmation = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4 py-20 relative overflow-hidden">
-      {/* Cinematic Background Elements */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-success/10 rounded-full blur-[120px] -z-10 animate-glow-pulse" />
+    <div className="min-h-screen bg-background flex items-center justify-center p-4 py-20 relative overflow-hidden animate-fade-in">
+      {/* Background Gradients */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-success/10 rounded-full blur-[120px] -z-10" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[30%] h-[30%] bg-primary/5 rounded-full blur-[100px] -z-10" />
 
-      <div className="w-full max-w-xl animate-fade-in">
-        <div className="glass-card overflow-hidden border-white/5 shadow-2xl">
-          {/* Success Header */}
-          <div className="bg-gradient-to-br from-success/20 via-success/5 to-transparent p-10 text-center relative">
-            <div className="w-24 h-24 mx-auto mb-6 rounded-3xl bg-success/20 flex items-center justify-center shadow-xl border border-success/30 group">
-              <CheckCircle className="w-12 h-12 text-success group-hover:scale-110 transition-transform duration-500" />
+      <div className="w-full max-w-xl">
+        <div className="glass-card overflow-hidden border-white/5 shadow-2xl bg-gradient-to-b from-white/[0.05] to-transparent rounded-[32px]">
+          {/* Header */}
+          <div className="p-10 text-center border-b border-white/5">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-[28px] bg-success/20 flex items-center justify-center shadow-lg border border-success/30 group animate-slide-up">
+              <CheckCircle className="w-10 h-10 text-success group-hover:scale-110 transition-transform duration-500" />
             </div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-success/10 border border-success/20 mb-4">
-              <span className="text-[10px] font-bold uppercase tracking-[3px] text-success">Transaction Successful</span>
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-success/10 border border-success/20 mb-4 animate-slide-up">
+              <span className="text-[10px] font-bold uppercase tracking-[3px] text-success">Order Finalized</span>
             </div>
-            <h1 className="font-display text-4xl font-bold text-white mb-2">
-              Reservation <span className="text-success italic">Confirmed</span>
+            <h1 className="font-display text-4xl font-bold text-white mb-2 italic tracking-tighter">
+              Reservation <span className="text-success">Confirmed</span>
             </h1>
-            <p className="text-muted-foreground font-light text-lg">
-              Your cinematic journey is reserved and ready.
+            <p className="text-muted-foreground font-light text-md opacity-70 italic">
+              Your assets are prepared. We await your presence.
             </p>
           </div>
 
-          {/* Booking Details */}
-          <div className="p-10 space-y-10 relative">
-            {/* Booking ID & PIN Area */}
-            <div className="grid grid-cols-2 gap-6">
-              <div className="p-5 rounded-2xl bg-white/5 border border-white/5 group hover:border-white/10 transition-all duration-300">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-2 font-bold">Booking Reference</p>
+          <div className="p-10 space-y-8 relative">
+            {/* Core Info Row */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-5 rounded-2xl bg-white/5 border border-white/5 hover:border-white/10 transition-all cursor-pointer" onClick={() => copyToClipboard(bookingId, 'Booking ID')}>
+                <p className="text-[9px] text-muted-foreground uppercase tracking-widest mb-2 font-bold opacity-50">Reference ID</p>
                 <div className="flex items-center justify-between">
-                  <p className="font-mono text-lg font-bold text-white tracking-tighter">{bookingId}</p>
-                  <button onClick={() => copyToClipboard(bookingId, 'Booking ID')} className="p-2 hover:bg-white/5 rounded-lg transition-colors">
-                    <Copy className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                  </button>
+                  <p className="font-mono text-sm font-bold text-white">{bookingId}</p>
+                  <Copy className="w-3 h-3 text-muted-foreground" />
                 </div>
               </div>
-              <div className="p-5 rounded-2xl bg-primary/5 border border-primary/20 group hover:border-primary/40 transition-all duration-300">
-                <p className="text-[10px] text-primary uppercase tracking-widest mb-2 font-bold">Gate Access PIN</p>
+              <div className="p-5 rounded-2xl bg-primary/5 border border-primary/20 hover:bg-primary/10 transition-all cursor-pointer" onClick={() => copyToClipboard(pin, 'Access PIN')}>
+                <p className="text-[9px] text-primary uppercase tracking-widest mb-2 font-bold opacity-70 italic">Gate Access PIN</p>
                 <div className="flex items-center justify-between">
-                  <p className="font-mono text-3xl font-black text-primary tracking-tighter">{pin}</p>
-                  <button onClick={() => copyToClipboard(pin, 'PIN')} className="p-2 hover:bg-primary/10 rounded-lg transition-colors">
-                    <Copy className="w-4 h-4 text-primary/70 group-hover:text-primary transition-colors" />
-                  </button>
+                  <p className="font-mono text-2xl font-black text-primary tracking-tight">{pin}</p>
+                  <Copy className="w-4 h-4 text-primary/40" />
                 </div>
               </div>
             </div>
 
             {/* Movie Info Visual */}
-            <div className="flex flex-col sm:flex-row gap-8 items-center sm:items-start text-center sm:text-left">
-              <div className="relative flex-shrink-0 group">
-                <img
-                  src={movie.poster}
-                  alt={movie.title}
-                  className="w-32 h-44 object-cover rounded-2xl shadow-2xl transition-transform duration-500 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 rounded-2xl ring-1 ring-white/10 group-hover:ring-primary/30 transition-all" />
-              </div>
+            <div className="flex gap-6 items-center p-6 bg-white/[0.02] border border-white/5 rounded-3xl">
+              <img
+                src={movie.poster}
+                alt={movie.title}
+                className="w-20 h-28 object-cover rounded-xl shadow-2xl border border-white/10"
+              />
               <div className="flex-1">
-                <h2 className="font-display text-3xl font-bold text-white mb-4 group-hover:text-primary transition-colors">
+                <h2 className="font-display text-2xl font-bold text-white mb-3 italic tracking-tight uppercase">
                   {movie.title}
                 </h2>
-                <div className="grid grid-cols-1 gap-y-3 font-medium text-muted-foreground">
-                  <div className="flex items-center gap-3 justify-center sm:justify-start">
-                    <Calendar className="w-4 h-4 text-primary" />
-                    <span className="text-sm">{formatDate(showtime.date)}</span>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Calendar className="w-3 h-3 text-primary" />
+                    <span>{formatDate(showtime.date)}</span>
                   </div>
-                  <div className="flex items-center gap-3 justify-center sm:justify-start">
-                    <Clock className="w-4 h-4 text-primary" />
-                    <span className="text-sm">{showtime.time}</span>
-                  </div>
-                  <div className="flex items-center gap-3 justify-center sm:justify-start">
-                    <MapPin className="w-4 h-4 text-primary" />
-                    <span className="text-sm">{screen.name}</span>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Clock className="w-3 h-3 text-primary" />
+                    <span className="font-display font-medium text-white italic">{showtime.time}</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Seats Visualization */}
-            <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <Ticket className="w-4 h-4 text-primary" />
-                  <p className="text-xs font-bold uppercase tracking-widest text-white">Your Selection</p>
-                </div>
-                <span className="text-xs text-muted-foreground">{seats.length} Seats Assigned</span>
-              </div>
-              <div className="flex flex-wrap gap-3">
-                {seats.map((seat) => (
-                  <span key={seat} className="px-4 py-1.5 bg-primary/10 text-primary border border-primary/20 rounded-xl text-sm font-black tracking-tight">
-                    {seat}
-                  </span>
-                ))}
-              </div>
+            {/* Selection Grid Summary */}
+            <div className="space-y-4">
+               <div className="flex items-center justify-between px-1">
+                  <div className="flex items-center gap-2">
+                     <Ticket className="w-4 h-4 text-primary" />
+                     <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Seats Issued</p>
+                  </div>
+                  <span className="text-[10px] font-black text-white px-2 py-0.5 rounded-md bg-primary/20 border border-primary/20">{seats.length} Tickets</span>
+               </div>
+               <div className="flex flex-wrap gap-2">
+                 {seats.map((seat) => (
+                   <span key={seat} className="px-4 py-2 bg-white/5 border border-white/5 hover:border-primary/30 transition-colors rounded-xl text-xs font-bold font-mono text-white">
+                     {seat}
+                   </span>
+                 ))}
+               </div>
             </div>
 
-            {/* Financial Summary */}
-            <div className="flex justify-between items-center py-6 border-y border-white/5">
+            {/* Final Financial Row */}
+            <div className="flex justify-between items-end pt-6 border-t border-white/5">
               <div className="space-y-1">
-                <p className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-bold">Total Consideration</p>
-                <div className="flex items-center gap-2">
-                  <Badge variant="secondary" className="bg-white/5 border-white/10 text-[9px] uppercase">{paymentMethod}</Badge>
+                <p className="text-[9px] uppercase tracking-widest text-muted-foreground font-bold opacity-50 italic">Total Consideration</p>
+                <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 w-fit">
+                   <div className="w-1 h-1 rounded-full bg-success animate-pulse" />
+                   <span className="text-[9px] uppercase font-bold text-success/80 tracking-widest">{paymentMethod}</span>
                 </div>
               </div>
-              <p className="text-4xl font-black text-primary tracking-tighter">NPR {total}</p>
-            </div>
-
-            {/* Important Notes */}
-            <div className="bg-primary/5 rounded-2xl p-6 border border-primary/10">
-              <p className="font-bold text-primary text-xs uppercase tracking-widest mb-4">Final Instructions</p>
-              <ul className="space-y-3 text-sm text-muted-foreground font-light leading-relaxed">
-                <li className="flex items-start gap-3 italic">
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 flex-shrink-0" />
-                  Kindly present this digital confirmation or the Gate Access PIN at the entrance.
-                </li>
-                <li className="flex items-start gap-3 italic">
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 flex-shrink-0" />
-                  To ensure complete immersion, we recommend arrival 15 minutes prior to showtime.
-                </li>
-              </ul>
+              <p className="text-4xl font-display font-black text-white italic tracking-tighter uppercase">NPR {total.toLocaleString()}</p>
             </div>
           </div>
 
-          {/* Action Bar */}
-          <div className="p-10 pt-0 flex flex-col sm:flex-row gap-4">
+          <div className="p-10 pt-4 flex flex-col sm:flex-row gap-4">
             <Link to="/bookings" className="flex-1">
-              <Button variant="gold" size="xl" className="w-full">
+              <Button variant="gold" size="xl" className="w-full h-14 rounded-2xl uppercase tracking-widest text-[10px] font-bold">
                 My Bookings
               </Button>
             </Link>
             <Link to="/" className="flex-1">
-              <Button variant="glass" size="xl" className="w-full">
+              <Button variant="outline" size="xl" className="w-full h-14 rounded-2xl uppercase tracking-widest text-[10px] font-bold border-white/10 bg-white/5">
                 New Experience
               </Button>
             </Link>
           </div>
 
-          {/* Functional Icons bar */}
-          <div className="px-10 pb-10 flex justify-center gap-8">
-            <button className="flex items-center gap-2 text-xs text-muted-foreground hover:text-primary transition-colors font-bold uppercase tracking-widest">
-              <Download className="w-4 h-4" /> Download PDF
+          <div className="px-10 pb-10 flex justify-center gap-8 border-t border-white/5 pt-8">
+            <button className="flex items-center gap-2 text-[9px] text-muted-foreground hover:text-primary transition-colors font-bold uppercase tracking-widest">
+              <Download className="w-3 h-3" /> Save PDF
             </button>
-            <button className="flex items-center gap-2 text-xs text-muted-foreground hover:text-primary transition-colors font-bold uppercase tracking-widest">
-              <Share2 className="w-4 h-4" /> Share Receipt
+            <button className="flex items-center gap-2 text-[9px] text-muted-foreground hover:text-primary transition-colors font-bold uppercase tracking-widest">
+              <Share2 className="w-3 h-3" /> Share Access
             </button>
           </div>
         </div>

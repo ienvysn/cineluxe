@@ -25,16 +25,30 @@ const AuthPage = () => {
   const onSubmit = (data) => {
     console.log(isLogin ? "Login Data:" : "Register Data:", data);
 
+    // Mock Token Generation
+    const mockToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9";
+    const userData = {
+      name: data.fullName || (data.email.split('@')[0]),
+      email: data.email,
+      role: data.email.includes('admin') ? 'admin' : 'user'
+    };
+
+    localStorage.setItem('cineluxe_token', mockToken);
+    localStorage.setItem('cineluxe_user', JSON.stringify(userData));
+
     toast.success(isLogin ? "Welcome back!" : "Account created!", {
       description: isLogin
         ? "You have successfully logged in"
         : "Please check your email to verify your account",
     });
 
-    if (isLogin) {
-
-      setTimeout(() => navigate("/"), 1500);
-    }
+    setTimeout(() => {
+      if (userData.role === 'admin') {
+        navigate("/admin");
+      } else {
+        navigate("/");
+      }
+    }, 1500);
   };
 
   const handleToggleMode = () => {

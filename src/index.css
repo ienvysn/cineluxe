@@ -1,5 +1,5 @@
 @config "../tailwind.config.js";
-@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -62,7 +62,7 @@
     --shadow-elevated: 0 20px 50px -15px hsl(0, 0%, 0%, 0.7);
     --shadow-card: 0 8px 30px -10px hsl(0, 0%, 0%, 0.5);
 
-    --font-display: "Playfair Display", serif;
+    --font-display: "Outfit", sans-serif;
     --font-body: "Inter", sans-serif;
   }
 }
