@@ -8,6 +8,7 @@ import { Label } from "../components/ui/label";
 import { Film, Mail, Lock, User, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { loginSchema, registerSchema } from "../lib/schemas";
+import { apiCall } from "../../api";
 
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -22,33 +23,40 @@ const AuthPage = () => {
     resolver: zodResolver(isLogin ? loginSchema : registerSchema),
   });
 
-  const onSubmit = (data) => {
-    console.log(isLogin ? "Login Data:" : "Register Data:", data);
+  const onSubmit = async (data) => {
+    try {
+      if (isLogin) {
+        // Handle Login
+        const response = await apiCall("POST", "/users/login", { data });
+        console.log("Login Response:", response);
+        localStorage.setItem("cineluxe_token", response.token);
+        localStorage.setItem("cineluxe_user", JSON.stringify(response.user));
 
-    // Mock Token Generation
-    const mockToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9";
-    const userData = {
-      name: data.fullName || (data.email.split('@')[0]),
-      email: data.email,
-      role: data.email.includes('admin') ? 'admin' : 'user'
-    };
+        toast.success("Welcome back!", {
+          description: "You have successfully logged in",
+        });
 
-    localStorage.setItem('cineluxe_token', mockToken);
-    localStorage.setItem('cineluxe_user', JSON.stringify(userData));
-
-    toast.success(isLogin ? "Welcome back!" : "Account created!", {
-      description: isLogin
-        ? "You have successfully logged in"
-        : "Welcome to CineLuxe! Your account is ready.",
-    });
-
-    setTimeout(() => {
-      if (userData.role === 'admin') {
-        navigate("/admin");
+        navigate("/");
       } else {
+        // Handle Signup
+        console.log("Signup started");
+        const response = await apiCall("POST", "/users/signup", { data });
+        console.log("Signup Response:", response);
+        localStorage.setItem("cineluxe_token", response.token);
+        localStorage.setItem("cineluxe_user", JSON.stringify(response.user));
+
+        toast.success("Account created!", {
+          description: "Welcome to CineLuxe! Your account is ready.",
+        });
+
         navigate("/");
       }
-    }, 500);
+    } catch (error) {
+      console.error("Auth error:", error);
+      toast.error(isLogin ? "Login Failed" : "Signup Failed", {
+        description: error.message || "An error occurred during authentication",
+      });
+    }
   };
 
   const handleToggleMode = () => {
@@ -64,7 +72,6 @@ const AuthPage = () => {
 
   return (
     <div className="min-h-screen bg-background flex animate-fade-in">
-
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-black items-center justify-center">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-background to-background" />
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[120px] animate-glow-pulse" />
@@ -83,7 +90,6 @@ const AuthPage = () => {
           </p>
         </div>
       </div>
-
 
       <div className="flex-1 flex items-center justify-center p-6 md:p-12">
         <div className="w-full max-w-md space-y-8 animate-slide-up">
@@ -125,7 +131,7 @@ const AuthPage = () => {
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                   <Input
                     id="fullName"
-                    placeholder="John Doe"
+                    placeholder="Ram Hari"
                     className="pl-11 bg-card/50 border-white/5 focus:border-primary/50"
                     {...register("fullName")}
                   />

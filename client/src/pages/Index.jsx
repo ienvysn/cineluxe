@@ -49,8 +49,6 @@ const Index = () => {
                 : "translate-y-10 opacity-0"
             }`}
           >
-
-
             <h1 className="font-display text-5xl md:text-8xl font-bold mb-6 leading-[1.1] tracking-tight text-white">
               Elevating the <br />
               <span className="text-gold-gradient">Cinematic Art</span>
@@ -168,11 +166,6 @@ const Index = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
             <div className="col-span-2">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-lg gold-gradient flex items-center justify-center">
-                  <span className="font-display font-bold text-black italic">
-                    CL
-                  </span>
-                </div>
                 <span className="font-display text-3xl font-bold tracking-tighter">
                   Cine<span className="text-primary">Luxe</span>
                 </span>
@@ -197,16 +190,6 @@ const Index = () => {
                     Coming Soon
                   </a>
                 </li>
-                <li>
-                  <a href="#" className="hover:text-primary transition-colors">
-                    Membership
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-primary transition-colors">
-                    Private Hire
-                  </a>
-                </li>
               </ul>
             </div>
             <div>
@@ -214,16 +197,16 @@ const Index = () => {
                 Contact
               </h4>
               <ul className="space-y-4 text-sm text-muted-foreground">
-                <li className="flex items-center gap-2">London, UK</li>
+                <li className="flex items-center gap-2">Kathmandu, Nepal</li>
                 <li className="flex items-center gap-2">
-                  concierge@cineluxe.vip
+                  ienvysnn@gmail.com
                 </li>
-                <li className="flex items-center gap-2">0800 LUXE CINEMA</li>
+                <li className="flex items-center gap-2">+977 9866666666</li>
               </ul>
             </div>
           </div>
           <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-muted-foreground font-medium uppercase tracking-[2px]">
-            <p>© 2024 CineLuxe. Crafted for the Connoisseur.</p>
+            <p>© 2026 CineLuxe. Crafted for the best.</p>
             <div className="flex gap-8">
               <a href="#" className="hover:text-white transition-colors">
                 Privacy

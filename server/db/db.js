@@ -10,7 +10,7 @@ const connection = async () => {
     await sequelize.sync({ alter: true });
     console.log("Connected");
   } catch (error) {
-    console.log("unable to connect");
+    console.log("unable to connect", error.message);
   }
 };
 

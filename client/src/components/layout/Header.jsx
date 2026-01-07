@@ -1,26 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Button } from '../ui/button';
-import { User, Ticket, Film, LogOut, LayoutDashboard } from 'lucide-react';
-import { toast } from 'sonner';
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Button } from "../ui/button";
+import { User, Ticket, Film, LogOut, LayoutDashboard } from "lucide-react";
+import { toast } from "sonner";
 
 export const Header = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('cineluxe_user');
+    const storedUser = localStorage.getItem("cineluxe_user");
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('cineluxe_token');
-    localStorage.removeItem('cineluxe_user');
+    localStorage.removeItem("cineluxe_token");
+    localStorage.removeItem("cineluxe_user");
     setUser(null);
     toast.success("Signed out successfully");
-    navigate('/');
+    navigate("/");
   };
 
   return (
@@ -36,10 +36,21 @@ export const Header = () => {
         </Link>
 
         <nav className="hidden md:flex items-center gap-8">
-          <Link to="/" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+          <Link
+            to="/"
+            className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+          >
             Now Showing
           </Link>
-          <button onClick={() => toast.info("Coming Soon Gallery", { description: "We are curating the next season of masterclasses." })} className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+          <button
+            onClick={() =>
+              toast.info("Coming Soon Gallery", {
+                description:
+                  "We are curating the next season of masterclasses.",
+              })
+            }
+            className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+          >
             Coming Soon
           </button>
         </nav>
@@ -47,27 +58,38 @@ export const Header = () => {
         <div className="flex items-center gap-3">
           {user ? (
             <div className="flex items-center gap-3">
-              {user.role === 'admin' && (
+              {user.role === "admin" && (
                 <Link to="/admin">
-                  <Button variant="ghost" size="sm" className="gap-2 hover:bg-white/5 text-primary">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="gap-2 hover:bg-white/5 text-primary"
+                  >
                     <LayoutDashboard className="w-4 h-4" />
                     <span className="hidden sm:inline">Admin</span>
                   </Button>
                 </Link>
               )}
               <Link to="/bookings">
-                <Button variant="ghost" size="sm" className="gap-2 hover:bg-white/5">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="gap-2 hover:bg-white/5"
+                >
                   <Ticket className="w-4 h-4" />
                   <span className="hidden sm:inline">My Bookings</span>
                 </Button>
               </Link>
               <div className="flex items-center gap-2 ml-2 pl-4 border-l border-white/10">
-                 <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xs">
-                    {user.name[0].toUpperCase()}
-                 </div>
-                 <button onClick={handleLogout} className="p-2 hover:bg-destructive/10 hover:text-destructive rounded-lg transition-colors text-muted-foreground">
-                    <LogOut className="w-4 h-4" />
-                 </button>
+                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xs">
+                  {(user.fullName || user.name || "U")[0].toUpperCase()}
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="p-2 hover:bg-destructive/10 hover:text-destructive rounded-lg transition-colors text-muted-foreground"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
               </div>
             </div>
           ) : (

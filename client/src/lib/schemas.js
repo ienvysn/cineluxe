@@ -15,8 +15,8 @@ export const registerSchema = z.object({
   path: ["confirmPassword"],
 });
 
-export const movieBookingSchema = z.object({
-  showtimeId: z.string(),
-  seats: z.array(z.string()).min(1, "Please select at least one seat"),
-  paymentMethod: z.enum(["esewa", "khalti", "connectips"]),
-});
+// export const movieBookingSchema = z.object({
+//   showtimeId: z.string(),
+//   seats: z.array(z.string()).min(1, "Please select at least one seat"),
+//   paymentMethod: z.enum(["esewa", "khalti", "connectips"]),
+// });
