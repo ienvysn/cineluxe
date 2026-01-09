@@ -1,6 +1,6 @@
+const express = require("express");
 const authenticate = require("../middleware/authMiddleware");
 const authorizeAdmin = require("../middleware/adminMiddleware");
-
 const {
   createMovie,
   getAllMovies,

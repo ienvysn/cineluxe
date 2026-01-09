@@ -124,13 +124,6 @@ const Index = () => {
                 Coming <span className="text-gold-gradient italic">Soon</span>
               </h2>
             </div>
-            <Button
-              variant="ghost"
-              className="text-primary hover:text-white group hidden sm:flex"
-            >
-              View All Releases{" "}
-              <ChevronRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Button>
           </div>
 
           <div className="relative px-2">
@@ -185,11 +178,6 @@ const Index = () => {
                     Now Showing
                   </a>
                 </li>
-                <li>
-                  <a href="#" className="hover:text-primary transition-colors">
-                    Coming Soon
-                  </a>
-                </li>
               </ul>
             </div>
             <div>
@@ -198,9 +186,7 @@ const Index = () => {
               </h4>
               <ul className="space-y-4 text-sm text-muted-foreground">
                 <li className="flex items-center gap-2">Kathmandu, Nepal</li>
-                <li className="flex items-center gap-2">
-                  ienvysnn@gmail.com
-                </li>
+                <li className="flex items-center gap-2">ienvysnn@gmail.com</li>
                 <li className="flex items-center gap-2">+977 9866666666</li>
               </ul>
             </div>

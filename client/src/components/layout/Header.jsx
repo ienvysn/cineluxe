@@ -35,26 +35,6 @@ export const Header = () => {
           </span>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-8">
-          <Link
-            to="/"
-            className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-          >
-            Now Showing
-          </Link>
-          <button
-            onClick={() =>
-              toast.info("Coming Soon Gallery", {
-                description:
-                  "We are curating the next season of masterclasses.",
-              })
-            }
-            className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-          >
-            Coming Soon
-          </button>
-        </nav>
-
         <div className="flex items-center gap-3">
           {user ? (
             <div className="flex items-center gap-3">

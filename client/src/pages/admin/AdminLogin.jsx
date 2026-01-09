@@ -16,29 +16,52 @@ const AdminLogin = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    setTimeout(() => {
-      if (username === 'admin' && password === 'admin123') {
-        const mockToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9";
-        const userData = {
-          name: 'Admin User',
-          email: 'admin@cineluxe.com',
-          role: 'admin'
-        };
+    if (username === '' || password === '') {
+      toast.error('Missing Credentials', {
+        description: 'Please enter both username and password.',
+      });
+      setIsLoading(false);
+      return;
+    }
 
-        localStorage.setItem('cineluxe_token', mockToken);
-        localStorage.setItem('cineluxe_user', JSON.stringify(userData));
+    try {
+      const response = await fetch('http://localhost:5000/api/users/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: username, password }),
+      });
 
-        toast.success('Login Successful', {
-          description: 'Welcome to the admin panel.',
-        });
-        navigate('/admin');
+      const data = await response.json();
+
+      if (response.ok) {
+        if (data.user.role === 'admin') {
+          localStorage.setItem('cineluxe_token', data.token);
+          localStorage.setItem('cineluxe_user', JSON.stringify(data.user));
+
+          toast.success('Login Successful', {
+            description: 'Welcome to the admin panel.',
+          });
+          navigate('/admin');
+        } else {
+          toast.error('Access Denied', {
+            description: 'You do not have admin privileges.',
+          });
+        }
       } else {
         toast.error('Login Failed', {
-          description: 'Invalid username or password.',
+          description: data.error || 'Invalid credentials.',
         });
       }
+    } catch (error) {
+      console.error('Login error:', error);
+      toast.error('Server Error', {
+        description: 'Could not connect to the server.',
+      });
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   return (
@@ -64,13 +87,13 @@ const AdminLogin = () => {
 
           <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="username" className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground ml-1">Username</Label>
+              <Label htmlFor="username" className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground ml-1">Email</Label>
               <div className="relative">
                 <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
                   id="username"
                   type="text"
-                  placeholder="Enter username"
+                  placeholder="Enter email"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="pl-12 bg-white/5 border-white/5 h-12 rounded-xl focus:border-primary/30 transition-all"
@@ -103,7 +126,7 @@ const AdminLogin = () => {
           <div className="mt-8 pt-6 border-t border-white/5 flex flex-col items-center gap-2">
              <p className="text-[9px] text-muted-foreground uppercase tracking-[2px] font-bold">Demo Credentials</p>
              <div className="flex gap-4">
-                <div className="text-[10px] text-muted-foreground"><span className="text-primary font-bold">User:</span> admin</div>
+                <div className="text-[10px] text-muted-foreground"><span className="text-primary font-bold">Email:</span> admin@cineluxe.com</div>
                 <div className="text-[10px] text-muted-foreground"><span className="text-primary font-bold">Pass:</span> admin123</div>
              </div>
           </div>

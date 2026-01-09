@@ -6,12 +6,11 @@ import { cn } from "../../lib/utils";
 
 export const ShowtimeList = ({ movieId, selectedDate }) => {
   const navigate = useNavigate();
-  // Filter showtimes for the specific movie and date
+
   const filteredShowtimes = showtimes.filter(
     (st) => st.movieId === movieId && st.date === selectedDate
   );
 
-  // Group by screen
   const screenIds = [...new Set(filteredShowtimes.map((st) => st.screenId))];
 
   if (filteredShowtimes.length === 0) {
