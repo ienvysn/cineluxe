@@ -89,7 +89,6 @@ const BookingPage = () => {
       return;
     }
 
-    // In a real app, we'd save the selection to state/context here
     navigate("/booking/payment", {
       state: {
         showtimeId: id,
@@ -152,9 +151,7 @@ const BookingPage = () => {
 
       <div className="container mx-auto px-4 pt-12">
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12">
-          {/* Seat Grid Area */}
           <div className="lg:col-span-8 flex flex-col items-center">
-            {/* Screen Indicator */}
             <div className="w-full max-w-2xl mb-20 relative">
               <div className="h-2 bg-gradient-to-b from-primary/40 to-transparent rounded-full shadow-[0_-10px_30px_rgba(218,165,32,0.3)]" />
               <p className="text-center text-[10px] uppercase tracking-[8px] text-muted-foreground mt-4 font-bold">
@@ -162,7 +159,6 @@ const BookingPage = () => {
               </p>
             </div>
 
-            {/* Seats Container */}
             <div className="relative overflow-x-auto pb-8 w-full flex justify-center custom-scrollbar">
               <div className="flex flex-col gap-3 min-w-fit px-4">
                 {rows.map((row) => (
@@ -213,7 +209,6 @@ const BookingPage = () => {
               </div>
             </div>
 
-            {/* Legend */}
             <div className="flex flex-wrap justify-center gap-8 mt-12 p-6 rounded-3xl bg-white/5 border border-white/5 backdrop-blur-sm">
               <div className="flex items-center gap-3">
                 <div className="w-6 h-6 rounded-lg bg-white/5 border border-white/10" />
@@ -238,7 +233,6 @@ const BookingPage = () => {
             </div>
           </div>
 
-          {/* Checkout Info Sidebar */}
           <div className="lg:col-span-4 space-y-6">
             <div className="glass-card p-8 border-white/10 relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-6 opacity-5 rotate-12 group-hover:rotate-0 transition-transform duration-700">

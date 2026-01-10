@@ -23,7 +23,7 @@ const BookingConfirmation = () => {
   const bookingData = location.state;
 
   useEffect(() => {
-    // Simulate payment verification/ticket issuance
+
     const timer = setTimeout(() => {
       setIsVerifying(false);
     }, 2000);
@@ -85,13 +85,13 @@ const BookingConfirmation = () => {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4 py-20 relative overflow-hidden animate-fade-in">
-      {/* Background Gradients */}
+
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-success/10 rounded-full blur-[120px] -z-10" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[30%] h-[30%] bg-primary/5 rounded-full blur-[100px] -z-10" />
 
       <div className="w-full max-w-xl">
         <div className="glass-card overflow-hidden border-white/5 shadow-2xl bg-gradient-to-b from-white/[0.05] to-transparent rounded-[32px]">
-          {/* Header */}
+
           <div className="p-10 text-center border-b border-white/5">
             <div className="w-20 h-20 mx-auto mb-6 rounded-[28px] bg-success/20 flex items-center justify-center shadow-lg border border-success/30 group animate-slide-up">
               <CheckCircle className="w-10 h-10 text-success group-hover:scale-110 transition-transform duration-500" />
@@ -108,7 +108,7 @@ const BookingConfirmation = () => {
           </div>
 
           <div className="p-10 space-y-8 relative">
-            {/* Core Info Row */}
+
             <div className="grid grid-cols-2 gap-4">
               <div className="p-5 rounded-2xl bg-white/5 border border-white/5 hover:border-white/10 transition-all cursor-pointer" onClick={() => copyToClipboard(bookingId, 'Booking ID')}>
                 <p className="text-[9px] text-muted-foreground uppercase tracking-widest mb-2 font-bold opacity-50">Reference ID</p>
@@ -126,7 +126,6 @@ const BookingConfirmation = () => {
               </div>
             </div>
 
-            {/* Movie Info Visual */}
             <div className="flex gap-6 items-center p-6 bg-white/[0.02] border border-white/5 rounded-3xl">
               <img
                 src={movie.poster}
@@ -150,7 +149,7 @@ const BookingConfirmation = () => {
               </div>
             </div>
 
-            {/* Selection Grid Summary */}
+
             <div className="space-y-4">
                <div className="flex items-center justify-between px-1">
                   <div className="flex items-center gap-2">
@@ -168,7 +167,7 @@ const BookingConfirmation = () => {
                </div>
             </div>
 
-            {/* Final Financial Row */}
+
             <div className="flex justify-between items-end pt-6 border-t border-white/5">
               <div className="space-y-1">
                 <p className="text-[9px] uppercase tracking-widest text-muted-foreground font-bold opacity-50 italic">Total Consideration</p>
