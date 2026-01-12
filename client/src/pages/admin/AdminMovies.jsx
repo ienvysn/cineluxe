@@ -21,7 +21,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '../../components/ui/alert-dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
+
 import { toast } from 'sonner';
 import { movies as initialMovies } from '../../data/mockData';
 import { Badge } from '../../components/ui/badge';
@@ -33,9 +33,7 @@ const AdminMovies = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState(null);
-  const [tmdbSearch, setTmdbSearch] = useState('');
-  const [tmdbResults, setTmdbResults] = useState([]);
-  const [isSearching, setIsSearching] = useState(false);
+
 
 
   const [formData, setFormData] = useState({
@@ -65,48 +63,10 @@ const AdminMovies = () => {
       trailerUrl: '',
     });
     setSelectedMovie(null);
-    setTmdbSearch('');
-    setTmdbResults([]);
+
   };
 
-  const handleTmdbSearch = async () => {
-    if (!tmdbSearch.trim()) return;
-    setIsSearching(true);
 
-
-    setTimeout(() => {
-      setTmdbResults([
-        {
-          id: 1,
-          title: tmdbSearch,
-          poster: 'https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg',
-          genre: ['Drama', 'Biography'],
-          duration: 180,
-          rating: 'R',
-          language: 'English',
-          synopsis: `Details for ${tmdbSearch}. This info is fetched from the movie database.`,
-          releaseDate: '2024-01-15',
-        },
-      ]);
-      setIsSearching(false);
-    }, 1000);
-  };
-
-  const selectTmdbMovie = (movie) => {
-    setFormData({
-      title: movie.title,
-      poster: movie.poster,
-      genre: movie.genre.join(', '),
-      rating: movie.rating,
-      language: movie.language,
-      synopsis: movie.synopsis,
-      releaseDate: movie.releaseDate,
-      trailerUrl: '',
-    });
-    toast.info('Info Loaded', {
-      description: `Loaded details for "${movie.title}".`
-    });
-  };
 
   const handleSaveMovie = () => {
     if (!formData.title || !formData.poster) {
@@ -280,50 +240,7 @@ const AdminMovies = () => {
                 <DialogDescription>Enter the movie details below.</DialogDescription>
               </DialogHeader>
 
-              <Tabs defaultValue={selectedMovie ? 'manual' : 'tmdb'} className="w-full">
-                <TabsList className="w-full bg-white/5 p-1 rounded-2xl mb-8 border border-white/5">
-                  <TabsTrigger value="tmdb" className="flex-1 rounded-xl">Search Online</TabsTrigger>
-                  <TabsTrigger value="manual" className="flex-1 rounded-xl">Manual Entry</TabsTrigger>
-                </TabsList>
 
-                <TabsContent value="tmdb" className="space-y-4 pt-2">
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Search movie database..."
-                      value={tmdbSearch}
-                      onChange={(e) => setTmdbSearch(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && handleTmdbSearch()}
-                      className="h-12 bg-white/5 border-white/5"
-                    />
-                    <Button onClick={handleTmdbSearch} disabled={isSearching} variant="goldOutline" className="h-12 px-6 rounded-xl uppercase tracking-widest text-[10px] font-bold">
-                      {isSearching ? '...' : 'Search'}
-                    </Button>
-                  </div>
-
-                  {tmdbResults.length > 0 && (
-                    <div className="space-y-2">
-                      {tmdbResults.map((result) => (
-                        <div
-                          key={result.id}
-                          className="flex items-center gap-4 p-3 rounded-2xl bg-white/[0.03] border border-white/5 cursor-pointer hover:bg-white/[0.08] transition-all"
-                          onClick={() => selectTmdbMovie(result)}
-                        >
-                          <img src={result.poster} className="w-12 h-16 object-cover rounded-lg" alt="" />
-                          <div className="flex-1">
-                            <p className="font-bold text-white">{result.title}</p>
-                            <p className="text-[9px] text-muted-foreground uppercase">{result.releaseDate}</p>
-                          </div>
-                   <Badge variant="goldOutline" className="text-[10px]">Select</Badge>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </TabsContent>
-
-                <TabsContent value="manual" className="pt-2">
-                   <p className="text-[10px] text-muted-foreground italic mb-4">Enter details manually in the form below.</p>
-                </TabsContent>
-              </Tabs>
 
               <div className="space-y-6 mt-8">
                 <div className="space-y-2">
