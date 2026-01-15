@@ -8,7 +8,11 @@ const authenticate = (req, res, next) => {
       .status(401)
       .json({ error: "No token provided, authorization denied" });
   }
+
+  console.log(authHeader);
   const token = authHeader.split(" ")[1];
+
+  console.log(token);
   const decoded = verifyToken(token);
 
   if (!decoded) {

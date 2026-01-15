@@ -3,6 +3,7 @@ const { connection } = require("./db/db");
 const bodyParser = require("body-parser");
 const userRoute = require("./routes/userRoute");
 const movieRoute = require("./routes/movieRoutes");
+const screenRoute = require("./routes/screenRoutes");
 
 const cors = require("cors");
 require("dotenv").config();
@@ -20,6 +21,7 @@ app.use(bodyParser.json());
 
 app.use("/api/users", userRoute);
 app.use("/api/movies", movieRoute);
+app.use("/api/screens", screenRoute);
 
 app.listen(port, () => {
   console.log(`Server Running at port : ${port}`);

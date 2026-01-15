@@ -3,7 +3,7 @@ const { Op } = require("sequelize");
 
 const createMovie = async (req, res) => {
   try {
-    const {
+    let {
       title,
       poster,
       genre,
@@ -17,7 +17,9 @@ const createMovie = async (req, res) => {
     if (!title || !duration) {
       return res.status(400).json({ error: "Title and duration are required" });
     }
-
+    if (typeof genre === "string") {
+      genre = genre.split(",").map((g) => g.trim());
+    }
     const movie = await Movie.create({
       title,
       poster,
@@ -28,7 +30,7 @@ const createMovie = async (req, res) => {
       synopsis,
       releaseDate,
     });
-
+    console.log("This is worling");
     res.status(201).json(movie);
   } catch (error) {
     console.error("Error creating movie:", error);

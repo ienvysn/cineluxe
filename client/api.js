@@ -18,22 +18,15 @@ export const apiCall = async (method, endpoint, options = {}) => {
     });
     return response?.data;
   } catch (error) {
-    console.error("API Error:", error);
-
+    console.error("API Error:", error.message);
 
     if (error.response && error.response.data && error.response.data.error) {
       throw new Error(error.response.data.error);
-    }
-
-    else if (error.response) {
+    } else if (error.response) {
       throw new Error(error.response.statusText || "Something went wrong");
-    }
-
-    else if (error.request) {
+    } else if (error.request) {
       throw new Error("Server unreachable. Please check your connection.");
-    }
-
-    else {
+    } else {
       throw new Error(error.message || "An unexpected error occurred");
     }
   }

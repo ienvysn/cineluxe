@@ -1,16 +1,28 @@
-import React, { useState } from 'react';
-import { Plus, Search, Edit, Trash2, Film, ExternalLink, Globe, Clock, Star, Calendar as CalendarIcon, PlayCircle } from 'lucide-react';
-import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
-import { Label } from '../../components/ui/label';
-import { Textarea } from '../../components/ui/textarea';
+import React, { useState } from "react";
+import {
+  Plus,
+  Search,
+  Edit,
+  Trash2,
+  Film,
+  ExternalLink,
+  Globe,
+  Clock,
+  Star,
+  Calendar as CalendarIcon,
+  PlayCircle,
+} from "lucide-react";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import { Label } from "../../components/ui/label";
+import { Textarea } from "../../components/ui/textarea";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from '../../components/ui/dialog';
+} from "../../components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,31 +32,30 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '../../components/ui/alert-dialog';
+} from "../../components/ui/alert-dialog";
 
-import { toast } from 'sonner';
-import { movies as initialMovies } from '../../data/mockData';
-import { Badge } from '../../components/ui/badge';
-import { cn } from '../../lib/utils';
+import { toast } from "sonner";
+import { movies as initialMovies } from "../../data/mockData";
+import { Badge } from "../../components/ui/badge";
+import { cn } from "../../lib/utils";
+import { apiCall } from "../../../api";
 
 const AdminMovies = () => {
   const [movieList, setMovieList] = useState(initialMovies);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState(null);
 
-
-
   const [formData, setFormData] = useState({
-    title: '',
-    poster: '',
-    genre: '',
-    rating: '',
-    language: '',
-    synopsis: '',
-    releaseDate: '',
-    trailerUrl: '',
+    title: "",
+    poster: "",
+    genre: "",
+    rating: "",
+    language: "",
+    synopsis: "",
+    releaseDate: "",
+    trailerUrl: "",
   });
 
   const filteredMovies = movieList.filter((movie) =>
@@ -53,101 +64,89 @@ const AdminMovies = () => {
 
   const resetForm = () => {
     setFormData({
-      title: '',
-      poster: '',
-      genre: '',
-      rating: '',
-      language: '',
-      synopsis: '',
-      releaseDate: '',
-      trailerUrl: '',
+      title: "",
+      poster: "",
+      genre: "",
+      rating: "",
+      language: "",
+      synopsis: "",
+      releaseDate: "",
+      trailerUrl: "",
     });
     setSelectedMovie(null);
-
   };
 
-
-
-  const handleSaveMovie = () => {
+  const handleSaveMovie = async () => {
     if (!formData.title || !formData.poster) {
-      toast.error('Missing Info', {
-        description: 'Please add a movie title and a poster image.',
+      toast.error("Missing Info", {
+        description: "Please add a movie title and a poster image.",
       });
       return;
     }
-
+    const token = localStorage.getItem("cineluxe_token");
     const movieData = {
-      id: selectedMovie?.id || Date.now().toString(),
       title: formData.title,
       poster: formData.poster,
-      genre: formData.genre.split(',').map((g) => g.trim()),
+      genre: formData.genre,
       duration: 120,
-      rating: formData.rating || 'PG-13',
-      language: formData.language || 'English',
+      rating: formData.rating || "PG-13",
+      language: formData.language || "English",
       synopsis: formData.synopsis,
-      releaseDate: formData.releaseDate || new Date().toISOString().split('T')[0],
-      trailerUrl: formData.trailerUrl || undefined,
+      releaseDate:
+        formData.releaseDate || new Date().toISOString().split("T")[0],
     };
 
-    if (selectedMovie) {
-      setMovieList((prev) =>
-        prev.map((m) => (m.id === selectedMovie.id ? movieData : m))
-      );
-      toast.success('Movie Updated', {
-        description: `"${movieData.title}" has been saved.`
-      });
-    } else {
-      setMovieList((prev) => [...prev, movieData]);
-      toast.success('Movie Added', {
-        description: `"${movieData.title}" has been added to your collection.`
-      });
+    try {
+      if (selectedMovie) {
+        const updated = await apiCall("PUT", `/movies/${selectedMovie.id}`, {
+          data: movieData,
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setMovieList((prev) =>
+          prev.map((m) => (m.id === selectedMovie.id ? updated : m))
+        );
+        toast.success("Movie Updated");
+      } else {
+        const newNode = await apiCall("POST", "/movies", {
+          headers: { Authorization: `Bearer ${token}` },
+          data: movieData,
+        });
+        setMovieList((prev) => [...prev, newNode]);
+        toast.success("Movie Added");
+      }
+
+      setIsAddDialogOpen(false);
+      resetForm();
+    } catch (error) {
+      toast.error("Error", { description: error.message });
     }
-
-    setIsAddDialogOpen(false);
-    resetForm();
   };
-
-  const handleEditMovie = (movie) => {
-    setSelectedMovie(movie);
-    setFormData({
-      title: movie.title,
-      poster: movie.poster,
-      genre: movie.genre.join(', '),
-      rating: movie.rating,
-      language: movie.language,
-      synopsis: movie.synopsis,
-      releaseDate: movie.releaseDate,
-      trailerUrl: movie.trailerUrl || '',
-    });
-    setIsAddDialogOpen(true);
-  };
-
-  const handleDeleteMovie = () => {
-    if (selectedMovie) {
-      setMovieList((prev) => prev.filter((m) => m.id !== selectedMovie.id));
-      toast.success('Movie Deleted', {
-        description: 'The movie has been removed from your list.'
-      });
-    }
-    setIsDeleteDialogOpen(false);
-    setSelectedMovie(null);
-  };
-
   return (
     <div className="space-y-12 animate-fade-in">
-
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-           <div className="inline-flex items-center gap-2 mb-4">
-              <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-              <span className="text-[10px] uppercase tracking-[3px] text-primary font-bold">Manage Movies</span>
-            </div>
+          <div className="inline-flex items-center gap-2 mb-4">
+            <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+            <span className="text-[10px] uppercase tracking-[3px] text-primary font-bold">
+              Manage Movies
+            </span>
+          </div>
           <h1 className="font-display text-5xl font-bold tracking-tighter">
             Movie <span className="text-gold-gradient italic">Collection</span>
           </h1>
-          <p className="text-muted-foreground mt-3 font-light text-lg">Add and manage movies in your cinema.</p>
+          <p className="text-muted-foreground mt-3 font-light text-lg">
+            Add and manage movies in your cinema.
+          </p>
         </div>
-        <Button variant="gold" size="xl" onClick={() => { resetForm(); setIsAddDialogOpen(true); }} className="px-8 h-14 rounded-2xl group shadow-2xl uppercase tracking-widest text-xs font-bold">
+        <Button
+          variant="gold"
+          size="xl"
+          onClick={() => {
+            resetForm();
+            setIsAddDialogOpen(true);
+          }}
+          className="px-8 h-14 rounded-2xl group shadow-2xl uppercase tracking-widest text-xs font-bold"
+        >
           <Plus className="w-5 h-5 mr-3 group-hover:rotate-90 transition-transform duration-300" />
           Add New Movie
         </Button>
@@ -161,7 +160,6 @@ const AdminMovies = () => {
           className="pl-14 h-16 bg-white/5 border-white/5 rounded-2xl text-lg font-light shadow-xl"
         />
       </div>
-
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
         {filteredMovies.map((movie, index) => (
@@ -196,10 +194,14 @@ const AdminMovies = () => {
               </div>
             </div>
             <div className="p-6">
-               <h3 className="font-display text-xl font-bold text-white truncate mb-2 group-hover:text-primary transition-colors">{movie.title}</h3>
-               <div className="flex items-center justify-between text-[11px] text-muted-foreground font-bold tracking-widest uppercase">
-                  <span className="flex items-center gap-1.5 group-hover:text-white transition-colors">{movie.rating} • {movie.language}</span>
-               </div>
+              <h3 className="font-display text-xl font-bold text-white truncate mb-2 group-hover:text-primary transition-colors">
+                {movie.title}
+              </h3>
+              <div className="flex items-center justify-between text-[11px] text-muted-foreground font-bold tracking-widest uppercase">
+                <span className="flex items-center gap-1.5 group-hover:text-white transition-colors">
+                  {movie.rating} • {movie.language}
+                </span>
+              </div>
             </div>
           </div>
         ))}
@@ -207,85 +209,114 @@ const AdminMovies = () => {
 
       {filteredMovies.length === 0 && (
         <div className="text-center py-20 bg-white/[0.02] rounded-[40px] border border-dashed border-white/10">
-          <p className="text-muted-foreground italic">No movies found in your collection.</p>
+          <p className="text-muted-foreground italic">
+            No movies found in your collection.
+          </p>
         </div>
       )}
-
 
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent className="max-w-3xl rounded-[40px] border-white/5 p-0 overflow-hidden bg-[#070707]">
           <div className="grid grid-cols-1 lg:grid-cols-5 h-full max-h-[90vh]">
-
             <div className="lg:col-span-2 bg-[#0A0A0A] p-10 flex flex-col items-center justify-center border-r border-white/5">
-                {formData.poster ? (
-                  <div className="w-full">
-                    <img
-                      src={formData.poster}
-                      alt="Preview"
-                      className="w-full aspect-[2/3] object-cover rounded-[32px] shadow-2xl border border-white/10"
-                    />
-                  </div>
-                ) : (
-                  <div className="w-full aspect-[2/3] rounded-[32px] bg-white/[0.02] border-2 border-dashed border-white/10 flex flex-col items-center justify-center text-center p-8">
-                     <PlayCircle className="w-12 h-12 text-muted-foreground/20 mb-4" />
-                     <p className="text-muted-foreground text-sm italic">Poster preview will appear here.</p>
-                  </div>
-                )}
+              {formData.poster ? (
+                <div className="w-full">
+                  <img
+                    src={formData.poster}
+                    alt="Preview"
+                    className="w-full aspect-[2/3] object-cover rounded-[32px] shadow-2xl border border-white/10"
+                  />
+                </div>
+              ) : (
+                <div className="w-full aspect-[2/3] rounded-[32px] bg-white/[0.02] border-2 border-dashed border-white/10 flex flex-col items-center justify-center text-center p-8">
+                  <PlayCircle className="w-12 h-12 text-muted-foreground/20 mb-4" />
+                  <p className="text-muted-foreground text-sm italic">
+                    Poster preview will appear here.
+                  </p>
+                </div>
+              )}
             </div>
-
 
             <div className="lg:col-span-3 p-10 overflow-y-auto custom-scrollbar">
               <DialogHeader className="mb-6">
-                <DialogTitle className="text-3xl font-display font-bold italic">{selectedMovie ? 'Edit' : 'Add'} <span className="text-primary italic">Movie</span></DialogTitle>
-                <DialogDescription>Enter the movie details below.</DialogDescription>
+                <DialogTitle className="text-3xl font-display font-bold italic">
+                  {selectedMovie ? "Edit" : "Add"}{" "}
+                  <span className="text-primary italic">Movie</span>
+                </DialogTitle>
+                <DialogDescription>
+                  Enter the movie details below.
+                </DialogDescription>
               </DialogHeader>
-
-
 
               <div className="space-y-6 mt-8">
                 <div className="space-y-2">
-                  <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Movie Title</Label>
+                  <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">
+                    Movie Title
+                  </Label>
                   <Input
                     value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, title: e.target.value })
+                    }
                     className="h-12 bg-white/5 border-white/5 rounded-xl font-bold font-display"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Poster URL</Label>
+                  <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">
+                    Poster URL
+                  </Label>
                   <Input
                     value={formData.poster}
-                    onChange={(e) => setFormData({ ...formData, poster: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, poster: e.target.value })
+                    }
                     className="h-11 bg-white/5 border-white/5 rounded-xl text-sm"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Rating</Label>
+                  <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">
+                    Rating
+                  </Label>
                   <Input
                     value={formData.rating}
-                    onChange={(e) => setFormData({ ...formData, rating: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, rating: e.target.value })
+                    }
                     className="h-11 bg-white/5 border-white/5 rounded-xl"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Story Summary</Label>
+                  <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">
+                    Story Summary
+                  </Label>
                   <Textarea
                     value={formData.synopsis}
-                    onChange={(e) => setFormData({ ...formData, synopsis: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, synopsis: e.target.value })
+                    }
                     rows={4}
                     className="rounded-2xl bg-white/5 border-white/5"
                   />
                 </div>
 
                 <div className="flex justify-end gap-3 pt-6 pb-8">
-                  <Button variant="ghost" onClick={() => setIsAddDialogOpen(false)} className="px-8 h-14 rounded-2xl uppercase tracking-widest text-[10px] font-bold">
+                  <Button
+                    variant="ghost"
+                    onClick={() => setIsAddDialogOpen(false)}
+                    className="px-8 h-14 rounded-2xl uppercase tracking-widest text-[10px] font-bold"
+                  >
                     Cancel
                   </Button>
-                  <Button variant="gold" size="xl" onClick={handleSaveMovie} className="px-10 h-14 rounded-2xl uppercase tracking-widest text-xs font-bold shadow-xl">
-                    {selectedMovie ? 'Save Changes' : 'Add Movie'}
+                  <Button
+                    variant="gold"
+                    size="xl"
+                    onClick={handleSaveMovie}
+                    className="px-10 h-14 rounded-2xl uppercase tracking-widest text-xs font-bold shadow-xl"
+                  >
+                    {selectedMovie ? "Save Changes" : "Add Movie"}
                   </Button>
                 </div>
               </div>
@@ -294,18 +325,29 @@ const AdminMovies = () => {
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
         <AlertDialogContent className="rounded-[40px] border-white/5 bg-[#0A0A0A] p-10">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-2xl font-display font-bold">Delete Movie?</AlertDialogTitle>
+            <AlertDialogTitle className="text-2xl font-display font-bold">
+              Delete Movie?
+            </AlertDialogTitle>
             <AlertDialogDescription className="mt-2 text-muted-foreground">
-              Are you sure you want to delete <span className="text-white font-bold">"{selectedMovie?.title}"</span>? This action cannot be undone.
+              Are you sure you want to delete{" "}
+              <span className="text-white font-bold">
+                "{selectedMovie?.title}"
+              </span>
+              ? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="mt-8 gap-4">
-            <AlertDialogCancel className="h-12 rounded-xl border-white/10">Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="h-12 rounded-xl border-white/10">
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleDeleteMovie}
+              // onClick={handleDeleteMovie}
               className="h-12 rounded-xl bg-destructive text-white hover:bg-destructive/80 font-bold"
             >
               Delete
