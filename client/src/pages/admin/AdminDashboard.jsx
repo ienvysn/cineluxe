@@ -9,7 +9,9 @@ import {
   ArrowUpRight,
   DollarSign,
 } from "lucide-react";
-import { movies, screens, showtimes } from "../../data/mockData";
+import { movies as mockMovies, screens, showtimes } from "../../data/mockData";
+import { movieService } from "../../services/movieService";
+import { useState, useEffect } from "react";
 import { Badge } from "../../components/ui/badge";
 import { cn } from "../../lib/utils";
 
@@ -45,6 +47,21 @@ const StatCard = ({ title, value, icon: Icon, trend, positive = true }) => (
 const AdminDashboard = () => {
   const todayDate = new Date().toISOString().split("T")[0];
   const todayShowtimes = showtimes.filter((s) => s.date === todayDate);
+  const [movieList, setMovieList] = useState(mockMovies);
+
+  useEffect(() => {
+    const fetchMovies = async () => {
+      try {
+        const data = await movieService.getAllMovies();
+        if (data && data.length > 0) {
+          setMovieList(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch movies:", error);
+      }
+    };
+    fetchMovies();
+  }, []);
 
   return (
     <div className="space-y-12 animate-fade-in">
@@ -107,7 +124,7 @@ const AdminDashboard = () => {
                   Movies Showing
                 </h3>
                 <p className="text-3xl font-bold text-white leading-none mt-2">
-                  {movies.length}
+                  {movieList.length}
                 </p>
               </div>
             </div>
@@ -147,7 +164,7 @@ const AdminDashboard = () => {
             <div className="divide-y divide-white/5">
               {todayShowtimes.length > 0 ? (
                 todayShowtimes.slice(0, 6).map((showtime, index) => {
-                  const movie = movies.find((m) => m.id === showtime.movieId);
+                  const movie = movieList.find((m) => m.id === showtime.movieId) || mockMovies.find((m) => m.id === showtime.movieId);
                   const screen = screens.find(
                     (s) => s.id === showtime.screenId
                   );

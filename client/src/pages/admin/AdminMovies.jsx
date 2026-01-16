@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Plus,
   Search,
@@ -33,12 +33,19 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../../components/ui/alert-dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../components/ui/select";
 
 import { toast } from "sonner";
 import { movies as initialMovies } from "../../data/mockData";
 import { Badge } from "../../components/ui/badge";
-import { cn } from "../../lib/utils";
-import { apiCall } from "../../../api";
+import { cn, getPosterUrl } from "../../lib/utils";
+import { movieService } from "../../services/movieService";
 
 const AdminMovies = () => {
   const [movieList, setMovieList] = useState(initialMovies);
@@ -46,6 +53,8 @@ const AdminMovies = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState(null);
+  const [posterFile, setPosterFile] = useState(null);
+  const [posterPreview, setPosterPreview] = useState(null);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -57,6 +66,21 @@ const AdminMovies = () => {
     releaseDate: "",
     trailerUrl: "",
   });
+
+  useEffect(() => {
+    fetchMovies();
+  }, []);
+
+  const fetchMovies = async () => {
+    try {
+      const data = await movieService.getAllMovies();
+      if (data) {
+        setMovieList(data);
+      }
+    } catch (error) {
+      toast.error("Failed to fetch movies");
+    }
+  };
 
   const filteredMovies = movieList.filter((movie) =>
     movie.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -74,43 +98,76 @@ const AdminMovies = () => {
       trailerUrl: "",
     });
     setSelectedMovie(null);
+    setPosterFile(null);
+    setPosterPreview(null);
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setPosterFile(file);
+      setPosterPreview(URL.createObjectURL(file));
+      setFormData({ ...formData, poster: "" }); // Clear URL if file selected
+    }
+  };
+
+  const handleEditMovie = (movie) => {
+    setSelectedMovie(movie);
+    setFormData({
+      title: movie.title,
+      poster: movie.poster,
+      genre: movie.genre || "",
+      rating: movie.rating || "",
+      language: movie.language || "",
+      synopsis: movie.synopsis || "",
+      releaseDate: movie.releaseDate || "",
+      trailerUrl: movie.trailerUrl || "",
+    });
+    setPosterPreview(getPosterUrl(movie.poster));
+    setPosterFile(null);
+    setIsAddDialogOpen(true);
   };
 
   const handleSaveMovie = async () => {
-    if (!formData.title || !formData.poster) {
+    if (!formData.title && !posterFile && !formData.poster) {
       toast.error("Missing Info", {
-        description: "Please add a movie title and a poster image.",
+        description: "Please add a movie title and a poster (file or URL).",
       });
       return;
     }
     const token = localStorage.getItem("cineluxe_token");
-    const movieData = {
-      title: formData.title,
-      poster: formData.poster,
-      genre: formData.genre,
-      duration: 120,
-      rating: formData.rating || "PG-13",
-      language: formData.language || "English",
-      synopsis: formData.synopsis,
-      releaseDate:
-        formData.releaseDate || new Date().toISOString().split("T")[0],
-    };
+
+    const form = new FormData();
+    form.append("title", formData.title);
+    form.append("genre", formData.genre);
+    form.append("duration", 120);
+    form.append("rating", formData.rating || "PG-13");
+    form.append("language", formData.language || "English");
+    form.append("synopsis", formData.synopsis);
+    form.append(
+      "releaseDate",
+      formData.releaseDate || new Date().toISOString().split("T")[0]
+    );
+
+    if (posterFile) {
+      form.append("posterFile", posterFile);
+    } else {
+      form.append("poster", formData.poster);
+    }
 
     try {
       if (selectedMovie) {
-        const updated = await apiCall("PUT", `/movies/${selectedMovie.id}`, {
-          data: movieData,
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const updated = await movieService.updateMovie(
+          selectedMovie.id,
+          form,
+          token
+        );
         setMovieList((prev) =>
           prev.map((m) => (m.id === selectedMovie.id ? updated : m))
         );
         toast.success("Movie Updated");
       } else {
-        const newNode = await apiCall("POST", "/movies", {
-          headers: { Authorization: `Bearer ${token}` },
-          data: movieData,
-        });
+        const newNode = await movieService.addMovie(form, token);
         setMovieList((prev) => [...prev, newNode]);
         toast.success("Movie Added");
       }
@@ -120,6 +177,22 @@ const AdminMovies = () => {
     } catch (error) {
       toast.error("Error", { description: error.message });
     }
+  };
+  const handleDeleteMovie = async () => {
+    if (selectedMovie) {
+      try {
+        const token = localStorage.getItem("cineluxe_token");
+        await movieService.deleteMovie(selectedMovie.id, token);
+        setMovieList((prev) => prev.filter((m) => m.id !== selectedMovie.id));
+        toast.success("Movie Deleted", {
+          description: "The movie has been removed from your list.",
+        });
+      } catch (error) {
+        toast.error("Failed to delete movie");
+      }
+    }
+    setIsDeleteDialogOpen(false);
+    setSelectedMovie(null);
   };
   return (
     <div className="space-y-12 animate-fade-in">
@@ -170,7 +243,7 @@ const AdminMovies = () => {
           >
             <div className="aspect-[2/3] relative overflow-hidden">
               <img
-                src={movie.poster}
+                src={getPosterUrl(movie.poster)}
                 alt={movie.title}
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
               />
@@ -219,10 +292,10 @@ const AdminMovies = () => {
         <DialogContent className="max-w-3xl rounded-[40px] border-white/5 p-0 overflow-hidden bg-[#070707]">
           <div className="grid grid-cols-1 lg:grid-cols-5 h-full max-h-[90vh]">
             <div className="lg:col-span-2 bg-[#0A0A0A] p-10 flex flex-col items-center justify-center border-r border-white/5">
-              {formData.poster ? (
+              {posterPreview || formData.poster ? (
                 <div className="w-full">
                   <img
-                    src={formData.poster}
+                    src={posterPreview || getPosterUrl(formData.poster)}
                     alt="Preview"
                     className="w-full aspect-[2/3] object-cover rounded-[32px] shadow-2xl border border-white/10"
                   />
@@ -264,13 +337,31 @@ const AdminMovies = () => {
 
                 <div className="space-y-2">
                   <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">
+                    Poster Upload
+                  </Label>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="h-11 bg-white/5 border-white/5 rounded-xl text-sm pt-2"
+                  />
+                  <p className="text-[9px] text-muted-foreground italic ml-1">
+                    Or provide a URL below
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">
                     Poster URL
                   </Label>
                   <Input
                     value={formData.poster}
-                    onChange={(e) =>
-                      setFormData({ ...formData, poster: e.target.value })
-                    }
+                    onChange={(e) => {
+                      setFormData({ ...formData, poster: e.target.value });
+                      setPosterFile(null);
+                      setPosterPreview(null);
+                    }}
+                    placeholder="https://example.com/poster.jpg"
                     className="h-11 bg-white/5 border-white/5 rounded-xl text-sm"
                   />
                 </div>
@@ -279,13 +370,23 @@ const AdminMovies = () => {
                   <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">
                     Rating
                   </Label>
-                  <Input
+                  <Select
                     value={formData.rating}
-                    onChange={(e) =>
-                      setFormData({ ...formData, rating: e.target.value })
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, rating: value })
                     }
-                    className="h-11 bg-white/5 border-white/5 rounded-xl"
-                  />
+                  >
+                    <SelectTrigger className="h-11 bg-white/5 border-white/5 rounded-xl">
+                      <SelectValue placeholder="Select Rating" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="G">G - General Audiences</SelectItem>
+                      <SelectItem value="PG">PG - Parental Guidance</SelectItem>
+                      <SelectItem value="PG-13">PG-13 - Parents Strongly Cautioned</SelectItem>
+                      <SelectItem value="R">R - Restricted</SelectItem>
+                      <SelectItem value="NC-17">NC-17 - Adults Only</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-2">
@@ -347,7 +448,7 @@ const AdminMovies = () => {
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
-              // onClick={handleDeleteMovie}
+              onClick={handleDeleteMovie}
               className="h-12 rounded-xl bg-destructive text-white hover:bg-destructive/80 font-bold"
             >
               Delete

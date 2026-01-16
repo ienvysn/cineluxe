@@ -4,6 +4,7 @@ const bodyParser = require("body-parser");
 const userRoute = require("./routes/userRoute");
 const movieRoute = require("./routes/movieRoutes");
 const screenRoute = require("./routes/screenRoutes");
+const { createUploadFolder } = require("./utils/imageHelper");
 
 const cors = require("cors");
 require("dotenv").config();
@@ -11,6 +12,8 @@ require("dotenv").config();
 const app = express();
 
 app.use(cors());
+app.use("/uploads", express.static("uploads"));
+createUploadFolder();
 connection();
 
 const port = process.env.PORT || 5000;

@@ -1,17 +1,41 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { movies, pricing } from '../data/mockData';
+import { movieService } from '../services/movieService';
+import { useEffect } from 'react';
 import { MovieHero } from '../components/movie/MovieHero';
 import { ShowtimeList } from '../components/movie/ShowtimeList';
 import { DateFilter } from '../components/movies/DateFilter';
+import { getPosterUrl } from '../lib/utils';
 
 const MovieDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const today = new Date().toISOString().split('T')[0];
   const [selectedDate, setSelectedDate] = useState(today);
+  const [movie, setMovie] = useState(mockMovies.find((m) => m.id === id));
+  const [isLoading, setIsLoading] = useState(true);
 
-  const movie = movies.find((m) => m.id === id);
+  useEffect(() => {
+    const fetchMovie = async () => {
+      try {
+        const data = await movieService.getMovieById(id);
+        if (data) {
+          setMovie(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch movie:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchMovie();
+  }, [id]);
+
+  if (isLoading && !movie) {
+    return <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+    </div>;
+  }
 
   if (!movie) {
     return (
@@ -41,7 +65,7 @@ const MovieDetail = () => {
   return (
     <div className="min-h-screen bg-background text-foreground pb-32">
       <MovieHero
-        movie={movie}
+        movie={{...movie, poster: getPosterUrl(movie.poster)}}
         pricing={pricing}
         isDiscountDay={isDiscountDay()}
       />

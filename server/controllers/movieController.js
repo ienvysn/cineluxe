@@ -14,6 +14,10 @@ const createMovie = async (req, res) => {
       releaseDate,
     } = req.body;
 
+    if (req.file) {
+      poster = `/uploads/posters/${req.file.filename}`;
+    }
+
     if (!title || !duration) {
       return res.status(400).json({ error: "Title and duration are required" });
     }
@@ -65,7 +69,17 @@ const getMovieById = async (req, res) => {
 const updateMovie = async (req, res) => {
   try {
     const { id } = req.params;
-    const [updated] = await Movie.update(req.body, {
+    let updateData = { ...req.body };
+
+    if (req.file) {
+      updateData.poster = `/uploads/posters/${req.file.filename}`;
+    }
+
+    if (typeof updateData.genre === "string") {
+      updateData.genre = updateData.genre.split(",").map((g) => g.trim());
+    }
+
+    const [updated] = await Movie.update(updateData, {
       where: { id },
     });
     if (!updated) {

@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Clock, Star, PlayCircle } from "lucide-react";
 import { Badge } from "../ui/badge";
-import { cn } from "../../lib/utils";
+import { cn, getPosterUrl } from "../../lib/utils";
 
 export const MovieCard = ({ movie }) => {
   const formatDuration = (minutes) => {
@@ -16,7 +16,7 @@ export const MovieCard = ({ movie }) => {
       <div className="glass-card flex flex-col h-full overflow-hidden transition-all duration-500 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.7)] hover:-translate-y-2 border-white/5 hover:border-primary/20 bg-card/40 backdrop-blur-md">
         <div className="relative aspect-[2/3] overflow-hidden">
           <img
-            src={movie.poster}
+            src={getPosterUrl(movie.poster)}
             alt={movie.title}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           />

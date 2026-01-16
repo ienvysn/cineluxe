@@ -25,7 +25,8 @@ const Movie = sequelize.define(
       allowNull: false,
     },
     rating: {
-      type: DataTypes.STRING,
+      type: DataTypes.ENUM("G", "PG", "PG-13", "R", "NC-17"),
+      defaultValue: "PG-13",
     },
     language: {
       type: DataTypes.STRING,

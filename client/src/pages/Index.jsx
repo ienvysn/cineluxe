@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { DateFilter } from "../components/movies/DateFilter";
 import { MovieCard } from "../components/movies/MovieCard";
 import { ComingSoonCard } from "../components/movies/ComingSoonCard";
-import { movies, showtimes, comingSoonMovies } from "../data/mockData";
+import { movies as mockMovies, showtimes, comingSoonMovies } from "../data/mockData";
+import { movieService } from "../services/movieService";
 import { Sparkles, Calendar, ChevronRight } from "lucide-react";
 import {
   Carousel,
@@ -18,19 +19,36 @@ const Index = () => {
   const today = new Date().toISOString().split("T")[0];
   const [selectedDate, setSelectedDate] = useState(today);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [movieList, setMovieList] = useState(mockMovies);
 
   useEffect(() => {
     setIsLoaded(true);
+    fetchMovies();
   }, []);
+
+  const fetchMovies = async () => {
+    try {
+      const data = await movieService.getAllMovies();
+      if (data && data.length > 0) {
+        setMovieList(data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch movies:", error);
+    }
+  };
 
   // Filter movies that have showtimes on the selected date
   const availableMovieIds = new Set(
     showtimes.filter((st) => st.date === selectedDate).map((st) => st.movieId)
   );
 
-  const filteredMovies = movies.filter((movie) =>
+  const filteredMovies = movieList.filter((movie) =>
     availableMovieIds.has(movie.id)
   );
+
+  // If no movies match the date (common with new DB data),
+  // show all movies for now so the user can see the integration works
+  const displayMovies = filteredMovies.length > 0 ? filteredMovies : movieList;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -75,9 +93,9 @@ const Index = () => {
 
         {/* Movies Grid */}
         <section className="mb-32">
-          {filteredMovies.length > 0 ? (
+          {displayMovies.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
-              {filteredMovies.map((movie, index) => (
+              {displayMovies.map((movie, index) => (
                 <div
                   key={movie.id}
                   className="animate-slide-up"
