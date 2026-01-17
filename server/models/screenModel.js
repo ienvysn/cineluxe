@@ -16,9 +16,15 @@ const Screen = sequelize.define(
     capacity: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      validate: {
+        min: {
+          args: [1],
+          msg: "Capacity must be at least 1"
+        }
+      }
     },
     screenType: {
-      type: DataTypes.STRING, // e.g., '2D', '3D', 'IMAX'
+      type: DataTypes.STRING,
       defaultValue: "2D",
     },
   },

@@ -4,11 +4,6 @@ import {
   Search,
   Edit,
   Trash2,
-  Film,
-  ExternalLink,
-  Globe,
-  Clock,
-  Star,
   Calendar as CalendarIcon,
   PlayCircle,
 } from "lucide-react";
@@ -167,8 +162,8 @@ const AdminMovies = () => {
         );
         toast.success("Movie Updated");
       } else {
-        const newNode = await movieService.addMovie(form, token);
-        setMovieList((prev) => [...prev, newNode]);
+        const newMovie = await movieService.addMovie(form, token);
+        setMovieList((prev) => [...prev, newMovie]);
         toast.success("Movie Added");
       }
 
@@ -183,7 +178,7 @@ const AdminMovies = () => {
       try {
         const token = localStorage.getItem("cineluxe_token");
         await movieService.deleteMovie(selectedMovie.id, token);
-        setMovieList((prev) => prev.filter((m) => m.id !== selectedMovie.id));
+        setMovieList((prev) => prev.filter((m) => m.id !== selectedMovie.id)); // display of movie by filtering the deleted
         toast.success("Movie Deleted", {
           description: "The movie has been removed from your list.",
         });
@@ -382,7 +377,9 @@ const AdminMovies = () => {
                     <SelectContent>
                       <SelectItem value="G">G - General Audiences</SelectItem>
                       <SelectItem value="PG">PG - Parental Guidance</SelectItem>
-                      <SelectItem value="PG-13">PG-13 - Parents Strongly Cautioned</SelectItem>
+                      <SelectItem value="PG-13">
+                        PG-13 - Parents Strongly Cautioned
+                      </SelectItem>
                       <SelectItem value="R">R - Restricted</SelectItem>
                       <SelectItem value="NC-17">NC-17 - Adults Only</SelectItem>
                     </SelectContent>

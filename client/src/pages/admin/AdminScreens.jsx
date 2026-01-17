@@ -36,8 +36,8 @@ import { cn } from "../../lib/utils";
 import { apiCall } from "../../../api";
 
 const AdminScreens = () => {
-  const screen = apiCall("GET", "/screen");
-  console.log(screen);
+  const screen = apiCall("GET", "/screens");
+
   const [screenList, setScreenList] = useState(initialScreens);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -55,10 +55,42 @@ const AdminScreens = () => {
     setSelectedScreen(null);
   };
 
-  const handleSaveScreen = () => {
+  const handleSaveScreen = async () => {
+    const token = localStorage.getItem("token");
+
     if (!formData.name) {
       toast.error("Name Missing", {
         description: "Please give a name to your cinema screen.",
+      });
+      return;
+    }
+    const rows = parseInt(formData.rows);
+    const seatsPerRow = parseInt(formData.seatsPerRow);
+
+    if (isNaN(rows) || rows < 1) {
+      toast.error("Invalid Rows", {
+        description: "Number of rows must be at least 1.",
+      });
+      return;
+    }
+
+    if (rows > 25) {
+      toast.error("Too Many Rows", {
+        description: "Maximum number of rows is 25.",
+      });
+      return;
+    }
+
+    if (isNaN(seatsPerRow) || seatsPerRow < 1) {
+      toast.error("Invalid Seats Per Row", {
+        description: "Seats per row must be at least 1.",
+      });
+      return;
+    }
+
+    if (seatsPerRow > 25) {
+      toast.error("Too Many Seats", {
+        description: "Maximum seats per row is 25.",
       });
       return;
     }
@@ -66,30 +98,48 @@ const AdminScreens = () => {
     const screenData = {
       id: selectedScreen?.id || `screen-${Date.now()}`,
       name: formData.name,
-      rows: parseInt(formData.rows) || 1,
-      seatsPerRow: parseInt(formData.seatsPerRow) || 1,
+      rows: rows,
+      seatsPerRow: seatsPerRow,
     };
 
-    if (selectedScreen) {
-      setScreenList((prev) =>
-        prev.map((s) => (s.id === selectedScreen.id ? screenData : s))
-      );
-      toast.success("Screen Updated", {
-        description: `"${screenData.name}" details have been saved.`,
-      });
-    } else {
-      setScreenList((prev) => [...prev, screenData]);
-      apiCall("POST", "/screen", {
-        headers: { Authorization: `Bearer ${token}` },
-        data: screenData,
-      });
-      toast.success("Screen Added", {
-        description: `"${screenData.name}" is now ready for showtimes.`,
+    try {
+      if (selectedScreen) {
+        setScreenList((prev) =>
+          prev.map((s) => (s.id === selectedScreen.id ? screenData : s))
+        );
+
+        // API Call
+        await apiCall("PUT", `/screens/${selectedScreen.id}`, {
+          data: screenData,
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        toast.success("Screen Updated", {
+          description: `"${screenData.name}" details have been saved.`,
+        });
+      } else {
+        setScreenList((prev) => [...prev, screenData]);
+
+        // API Call
+        await apiCall("POST", "/screens", {
+          data: screenData,
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        toast.success("Screen Added", {
+          description: `"${screenData.name}" is now ready for showtimes.`,
+        });
+      }
+
+      setIsAddDialogOpen(false);
+      resetForm();
+    } catch (error) {
+      console.error("Failed to save screen:", error);
+      toast.error("Save Failed", {
+        description:
+          "There was a problem saving your screen. Please try again.",
       });
     }
-
-    setIsAddDialogOpen(false);
-    resetForm();
   };
 
   const handleDeleteScreen = () => {
@@ -220,9 +270,9 @@ const AdminScreens = () => {
       </div>
 
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent className="max-w-2xl rounded-[40px] border-white/5 bg-[#070707] p-0 overflow-hidden shadow-2xl">
-          <div className="grid grid-cols-1 lg:grid-cols-2 h-full">
-            <div className="bg-[#0A0A0A] p-10 border-r border-white/5">
+        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col rounded-[40px] border-white/5 bg-[#070707] p-0 overflow-hidden shadow-2xl">
+          <div className="grid grid-cols-1 lg:grid-cols-2 h-full overflow-hidden">
+            <div className="bg-[#0A0A0A] p-10 border-r border-white/5 flex flex-col h-full overflow-hidden">
               <div className="flex items-center gap-4 mb-10">
                 <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                   <Grid3X3 className="w-5 h-5" />
@@ -232,32 +282,38 @@ const AdminScreens = () => {
                 </h3>
               </div>
 
-              <div className="space-y-8">
-                <div className="relative">
-                  <div className="w-full h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent shadow-[0_0_15px_rgba(218,165,32,0.4)] rounded-full mb-8" />
-                  <div
-                    className="grid gap-1.5"
-                    style={{
-                      gridTemplateColumns: `repeat(${Math.min(
-                        formData.seatsPerRow,
-                        15
-                      )}, minmax(0, 1fr))`,
-                    }}
-                  >
-                    {[
-                      ...Array(
-                        Math.min(formData.rows * formData.seatsPerRow, 150)
-                      ),
-                    ].map((_, i) => (
-                      <div
-                        key={i}
-                        className="aspect-square rounded-sm bg-white/5 border border-white/5"
-                      />
-                    ))}
+              <div className="space-y-8 flex flex-col h-full">
+                <div className="flex-1 min-h-0 bg-[#0A0A0A] rounded-2xl border border-white/5 p-4 overflow-y-auto custom-scrollbar">
+                  <div className="relative min-h-full flex flex-col items-center justify-center">
+                    <div className="w-full h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent shadow-[0_0_15px_rgba(218,165,32,0.4)] rounded-full mb-8 shrink-0" />
+                    <div
+                      className="grid gap-1.5 w-full max-w-md mx-auto"
+                      style={{
+                        gridTemplateColumns: `repeat(${Math.min(
+                          Math.max(formData.seatsPerRow, 1),
+                          15
+                        )}, minmax(0, 1fr))`,
+                      }}
+                    >
+                      {[
+                        ...Array(
+                          Math.min(
+                            Math.max(formData.rows, 1) *
+                              Math.max(formData.seatsPerRow, 1),
+                            150
+                          )
+                        ),
+                      ].map((_, i) => (
+                        <div
+                          key={i}
+                          className="aspect-square rounded-sm bg-white/5 border border-white/5"
+                        />
+                      ))}
+                    </div>
                   </div>
                 </div>
 
-                <p className="text-[10px] text-muted-foreground italic text-center font-light uppercase tracking-widest pb-4">
+                <p className="text-[10px] text-muted-foreground italic text-center font-light uppercase tracking-widest pt-4 shrink-0">
                   Audience Seating Preview
                 </p>
               </div>
@@ -293,10 +349,16 @@ const AdminScreens = () => {
                     </Label>
                     <Input
                       type="number"
+                      min="1"
+                      max="25"
                       value={formData.rows}
-                      onChange={(e) =>
-                        setFormData({ ...formData, rows: e.target.value })
-                      }
+                      onChange={(e) => {
+                        const val = Math.max(
+                          1,
+                          Math.min(parseInt(e.target.value) || 0, 25)
+                        );
+                        setFormData({ ...formData, rows: val });
+                      }}
                       className="h-12 bg-white/5 border-white/5 rounded-xl font-bold"
                     />
                   </div>
@@ -306,31 +368,37 @@ const AdminScreens = () => {
                     </Label>
                     <Input
                       type="number"
+                      min="1"
+                      max="25"
                       value={formData.seatsPerRow}
-                      onChange={(e) =>
+                      onChange={(e) => {
+                        const val = Math.max(
+                          1,
+                          Math.min(parseInt(e.target.value) || 0, 25)
+                        );
                         setFormData({
                           ...formData,
-                          seatsPerRow: e.target.value,
-                        })
-                      }
+                          seatsPerRow: val,
+                        });
+                      }}
                       className="h-12 bg-white/5 border-white/5 rounded-xl font-bold"
                     />
                   </div>
                 </div>
 
-                <div className="pt-8 flex justify-end gap-3">
+                <div className="pt-8 flex justify-end gap-3 w-full">
                   <Button
                     variant="ghost"
                     onClick={() => setIsAddDialogOpen(false)}
-                    className="px-8 h-14 rounded-2xl uppercase tracking-widest text-[10px] font-black"
+                    className="px-6 h-12 rounded-xl uppercase tracking-widest text-[10px] font-black hover:bg-white/5"
                   >
                     Cancel
                   </Button>
                   <Button
                     variant="gold"
-                    size="xl"
+                    size="lg"
                     onClick={handleSaveScreen}
-                    className="px-12 h-14 rounded-2xl shadow-xl uppercase tracking-widest text-xs font-black"
+                    className="px-8 h-12 rounded-xl shadow-xl uppercase tracking-widest text-[10px] font-black"
                   >
                     {selectedScreen ? "Save Changes" : "Add Screen"}
                   </Button>

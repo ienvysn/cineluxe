@@ -46,8 +46,7 @@ const Index = () => {
     availableMovieIds.has(movie.id)
   );
 
-  // If no movies match the date (common with new DB data),
-  // show all movies for now so the user can see the integration works
+
   const displayMovies = filteredMovies.length > 0 ? filteredMovies : movieList;
 
   return (

@@ -7,10 +7,14 @@ const createScreen = async (req, res) => {
     if (!name || !capacity) {
       return res.status(400).json({ error: "Name and capacity are required" });
     }
+    const capacityNum = parseInt(capacity);
+    if (isNaN(capacityNum) || capacityNum < 1) {
+      return res.status(400).json({ error: "Capacity must be a positive number" });
+    }
 
     const screen = await Screen.create({
       name,
-      capacity,
+      capacity: capacityNum,
       screenType,
     });
 
