@@ -2,20 +2,28 @@ const Screen = require("../models/screenModel");
 
 const createScreen = async (req, res) => {
   try {
-    const { name, capacity, screenType } = req.body;
+    const { name, capacity, rows, seatsPerRow } = req.body;
 
-    if (!name || !capacity) {
-      return res.status(400).json({ error: "Name and capacity are required" });
+    if (!name) {
+      return res.status(400).json({ error: "Name is required" });
     }
-    const capacityNum = parseInt(capacity);
-    if (isNaN(capacityNum) || capacityNum < 1) {
-      return res.status(400).json({ error: "Capacity must be a positive number" });
+
+    let finalCapacity = capacity;
+    if (!finalCapacity && rows && seatsPerRow) {
+      finalCapacity = rows * seatsPerRow;
+    }
+
+    if (!finalCapacity) {
+      return res
+        .status(400)
+        .json({ error: "Capacity or layout info is required" });
     }
 
     const screen = await Screen.create({
       name,
-      capacity: capacityNum,
-      screenType,
+      capacity: finalCapacity,
+      rows: rows || 0,
+      seatsPerRow: seatsPerRow || 0,
     });
 
     res.status(201).json(screen);
@@ -52,7 +60,14 @@ const getScreenById = async (req, res) => {
 const updateScreen = async (req, res) => {
   try {
     const { id } = req.params;
-    const [updated] = await Screen.update(req.body, {
+    const { name, capacity, rows, seatsPerRow, screenType } = req.body;
+
+    let updateData = { ...req.body };
+    if (!capacity && rows && seatsPerRow) {
+      updateData.capacity = rows * seatsPerRow;
+    }
+
+    const [updated] = await Screen.update(updateData, {
       where: { id },
     });
     if (!updated) {

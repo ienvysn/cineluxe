@@ -19,19 +19,25 @@ const Screen = sequelize.define(
       validate: {
         min: {
           args: [1],
-          msg: "Capacity must be at least 1"
-        }
-      }
+          msg: "Capacity must be at least 1",
+        },
+      },
     },
-    screenType: {
-      type: DataTypes.STRING,
-      defaultValue: "2D",
+    rows: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 1,
+    },
+    seatsPerRow: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 1,
     },
   },
   {
     timestamps: true,
     underscored: true,
-  }
+  },
 );
 
 module.exports = Screen;

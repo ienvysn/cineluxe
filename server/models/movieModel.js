@@ -41,6 +41,6 @@ const Movie = sequelize.define(
   {
     timestamps: true,
     underscored: true,
-  }
+  },
 );
 module.exports = Movie;

@@ -65,20 +65,22 @@ const AdminLayout = () => {
           "fixed lg:static inset-y-0 left-0 z-50 bg-[#070707] border-r border-white/5 transition-all duration-500 ease-in-out",
           isSidebarOpen
             ? "w-72 translate-x-0"
-            : "-translate-x-full lg:translate-x-0 lg:w-24"
+            : "-translate-x-full lg:translate-x-0 lg:w-24",
         )}
       >
         <div className="flex flex-col h-full">
-          <div className="h-24 px-6 border-b border-white/5 flex items-center justify-between">
+          <div
+            className={cn(
+              "h-24 border-b border-white/5 flex items-center transition-all duration-500",
+              isSidebarOpen ? "px-6 justify-between" : "justify-center",
+            )}
+          >
             <div
               className={cn(
-                "flex items-center gap-3 transition-opacity duration-300",
-                !isSidebarOpen && "lg:opacity-0"
+                "items-center gap-3 transition-all duration-300",
+                isSidebarOpen ? "flex opacity-100" : "hidden lg:opacity-0",
               )}
             >
-              <div className="w-10 h-10 rounded-xl gold-gradient flex items-center justify-center shadow-lg shadow-primary/20">
-                <Film className="w-5 h-5 text-black" />
-              </div>
               <span className="font-display font-bold text-xl tracking-tight text-white whitespace-nowrap">
                 CineLuxe{" "}
                 <span className="text-[10px] uppercase tracking-widest text-muted-foreground ml-1 font-bold">
@@ -114,7 +116,7 @@ const AdminLayout = () => {
                     "group w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-300 text-left relative overflow-hidden",
                     isActive
                       ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:bg-white/5 hover:text-white"
+                      : "text-muted-foreground hover:bg-white/5 hover:text-white",
                   )}
                 >
                   {isActive && (
@@ -123,7 +125,7 @@ const AdminLayout = () => {
                   <item.icon
                     className={cn(
                       "w-5 h-5 flex-shrink-0 transition-transform duration-300 group-hover:scale-110",
-                      isActive && "text-primary"
+                      isActive && "text-primary",
                     )}
                   />
                   {isSidebarOpen && (
@@ -173,10 +175,7 @@ const AdminLayout = () => {
             <Menu className="w-5 h-5 text-primary" />
           </Button>
           <div className="flex items-center gap-2">
-            <Film className="w-5 h-5 text-primary" />
-            <span className="font-display font-bold text-lg">
-              Cine<span className="text-primary italic">Luxe</span>
-            </span>
+            <span className="font-display font-bold text-lg">CineLuxe</span>
           </div>
           <div className="w-10" />
         </header>

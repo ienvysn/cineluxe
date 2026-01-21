@@ -16,7 +16,7 @@ const authenticate = (req, res, next) => {
   const decoded = verifyToken(token);
 
   if (!decoded) {
-    return res.status(401).json({ error: "Token is not valid" });
+    return res.status(401).json({ error: "Token is no bala blas valid" });
   }
   req.user = decoded;
   next();

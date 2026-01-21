@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Plus, Search, Calendar as CalendarIcon, Clock, Film, Monitor, Trash2, Filter, LayoutGrid, CalendarRange } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, Search, Calendar as CalendarIcon, Clock, Film, Monitor, Trash2, Filter, LayoutGrid, CalendarRange, Loader2 } from 'lucide-react';
 import { format, addDays, startOfDay } from 'date-fns';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
@@ -19,12 +19,16 @@ import {
 } from '../../components/ui/select';
 import { Checkbox } from '../../components/ui/checkbox';
 import { toast } from 'sonner';
-import { movies, screens, showtimes as initialShowtimes } from '../../data/mockData';
 import { Badge } from '../../components/ui/badge';
 import { cn } from '../../lib/utils';
+import { showtimeApi, movieApi, screenApi } from '../../../api';
 
 const AdminShowtimes = () => {
-  const [scheduledShows, setScheduledShows] = useState(initialShowtimes);
+  const [scheduledShows, setScheduledShows] = useState([]);
+  const [movies, setMovies] = useState([]);
+  const [screens, setScreens] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isCreating, setIsCreating] = useState(false);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [filterMovie, setFilterMovie] = useState('all');
   const [filterDate, setFilterDate] = useState(format(new Date(), 'yyyy-MM-dd'));
@@ -37,13 +41,55 @@ const AdminShowtimes = () => {
     date: format(new Date(), 'yyyy-MM-dd'),
     time: '14:00',
     recurringDays: 7,
+    price: 300,
   });
 
-  const filteredShowtimes = scheduledShows.filter((s) => {
-    const matchesMovie = filterMovie === 'all' || s.movieId === filterMovie;
-    const matchesDate = !filterDate || s.date === filterDate;
-    return matchesMovie && matchesDate;
-  });
+  // Load initial data
+  useEffect(() => {
+    loadInitialData();
+  }, []);
+
+  // Load showtimes when filters change
+  useEffect(() => {
+    loadShowtimes();
+  }, [filterMovie, filterDate]);
+
+  const loadInitialData = async () => {
+    try {
+      setIsLoading(true);
+      const [moviesData, screensData] = await Promise.all([
+        movieApi.getAll(),
+        screenApi.getAll(),
+      ]);
+      setMovies(moviesData);
+      setScreens(screensData);
+    } catch (error) {
+      console.error('Error loading data:', error);
+      toast.error('Failed to load data', {
+        description: error.message || 'Could not load movies and screens',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadShowtimes = async () => {
+    try {
+      const filters = {};
+      if (filterMovie !== 'all') filters.movieId = filterMovie;
+      if (filterDate) filters.date = filterDate;
+
+      const data = await showtimeApi.getAll(filters);
+      setScheduledShows(data);
+    } catch (error) {
+      console.error('Error loading showtimes:', error);
+      toast.error('Failed to load showtimes', {
+        description: error.message || 'Could not fetch showtimes',
+      });
+    }
+  };
+
+  const filteredShowtimes = scheduledShows;
 
   const resetForm = () => {
     setFormData({
@@ -52,10 +98,11 @@ const AdminShowtimes = () => {
       date: format(new Date(), 'yyyy-MM-dd'),
       time: '14:00',
       recurringDays: 7,
+      price: 300,
     });
   };
 
-  const handleSaveShowtime = () => {
+  const handleSaveShowtime = async () => {
     if (!formData.movieId || !formData.screenId) {
       toast.error('Missing Info', {
         description: 'Please select both a movie and a screen.',
@@ -63,38 +110,77 @@ const AdminShowtimes = () => {
       return;
     }
 
-    const newShowtimes = [];
-    const count = addMode === 'recurring' ? formData.recurringDays : 1;
+    try {
+      setIsCreating(true);
 
-    for (let i = 0; i < count; i++) {
-      const date = addDays(new Date(formData.date), i);
-      const dateStr = format(date, 'yyyy-MM-dd');
+      if (addMode === 'single') {
+        // Create single showtime
+        await showtimeApi.create({
+          movieId: formData.movieId,
+          screenId: formData.screenId,
+          date: formData.date,
+          time: formData.time,
+          price: formData.price,
+        });
 
-      newShowtimes.push({
-        id: `${formData.movieId}-${formData.screenId}-${dateStr}-${formData.time}`,
-        movieId: formData.movieId,
-        screenId: formData.screenId,
-        date: dateStr,
-        time: formData.time,
-        bookedSeats: [],
-        heldSeats: [],
+        toast.success('Showtime Added', {
+          description: 'New showtime has been created successfully.',
+        });
+      } else {
+        // Create recurring showtimes
+        const times = [formData.time];
+        const startDate = formData.date;
+        const endDate = format(addDays(new Date(formData.date), formData.recurringDays - 1), 'yyyy-MM-dd');
+
+        const result = await showtimeApi.createRecurring({
+          movieId: formData.movieId,
+          screenId: formData.screenId,
+          startDate,
+          endDate,
+          times,
+          price: formData.price,
+        });
+
+        toast.success('Showtimes Added', {
+          description: `Added ${result.created} new showtime(s) to the schedule.`,
+        });
+      }
+
+      setIsAddDialogOpen(false);
+      resetForm();
+      loadShowtimes();
+    } catch (error) {
+      console.error('Error saving showtime:', error);
+      toast.error('Failed to create showtime', {
+        description: error.message || 'An error occurred while creating the showtime',
+      });
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const handleDeleteShowtime = async (id) => {
+    try {
+      await showtimeApi.delete(id);
+      toast.success('Showtime Removed', {
+        description: 'The show has been deleted from the schedule.',
+      });
+      loadShowtimes();
+    } catch (error) {
+      console.error('Error deleting showtime:', error);
+      toast.error('Failed to delete showtime', {
+        description: error.message || 'Could not delete the showtime',
       });
     }
-
-    setScheduledShows((prev) => [...prev, ...newShowtimes]);
-    toast.success('Showtime Added', {
-      description: `Added ${newShowtimes.length} new showtime(s) to the schedule.`
-    });
-    setIsAddDialogOpen(false);
-    resetForm();
   };
 
-  const handleDeleteShowtime = (id) => {
-    setScheduledShows((prev) => prev.filter((s) => s.id !== id));
-    toast.success('Showtime Removed', {
-      description: 'The show has been deleted from the schedule.'
-    });
-  };
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-12 animate-fade-in">
@@ -145,16 +231,16 @@ const AdminShowtimes = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
         {filteredShowtimes.map((showtime) => {
-          const movie = movies.find(m => m.id === showtime.movieId);
-          const screen = screens.find(s => s.id === showtime.screenId);
+          const movie = showtime.movie || movies.find(m => m.id === showtime.movieId);
+          const screen = showtime.screen || screens.find(s => s.id === showtime.screenId);
           return (
             <div key={showtime.id} className="glass-card p-6 group hover:border-primary/20 transition-all flex flex-col gap-5">
                <div className="flex gap-4">
                   <img src={movie?.poster} alt="" className="w-16 h-24 object-cover rounded-xl border border-white/10" />
                   <div className="flex-1 overflow-hidden">
-                     <h3 className="font-display text-lg font-bold text-white truncate group-hover:text-primary transition-colors leading-tight mb-2">{movie?.title}</h3>
+                     <h3 className="font-display text-lg font-bold text-white truncate group-hover:text-primary transition-colors leading-tight mb-2">{movie?.title || 'Unknown Movie'}</h3>
                      <div className="space-y-1.5">
-                        <span className="flex items-center gap-2 text-[10px] uppercase font-bold text-muted-foreground"><Monitor className="w-3 h-3 text-primary" /> {screen?.name}</span>
+                        <span className="flex items-center gap-2 text-[10px] uppercase font-bold text-muted-foreground"><Monitor className="w-3 h-3 text-primary" /> {screen?.name || 'Unknown Screen'}</span>
                         <span className="flex items-center gap-2 text-[10px] uppercase font-bold text-muted-foreground"><CalendarIcon className="w-3 h-3 text-primary" /> {format(new Date(showtime.date), 'EEE, MMM dd')}</span>
                      </div>
                   </div>
@@ -162,7 +248,7 @@ const AdminShowtimes = () => {
 
                <div className="flex items-center justify-between pt-2 border-t border-white/5">
                   <div className="px-5 py-1.5 bg-primary/10 border border-primary/20 rounded-full">
-                     <span className="text-xl font-display font-bold text-primary italic tracking-tight">{showtime.time}</span>
+                     <span className="text-xl font-display font-bold text-primary italic tracking-tight">{showtime.time?.substring(0, 5) || showtime.time}</span>
                   </div>
                   <button onClick={() => handleDeleteShowtime(showtime.id)} className="p-3 rounded-xl bg-destructive/10 text-destructive hover:bg-destructive hover:text-white transition-all border border-destructive/20 opacity-0 group-hover:opacity-100">
                      <Trash2 className="w-4 h-4" />
@@ -264,8 +350,21 @@ const AdminShowtimes = () => {
                       <Button variant="ghost" onClick={() => setIsAddDialogOpen(false)} className="px-8 h-14 rounded-2xl uppercase tracking-widest text-[10px] font-bold">
                          Cancel
                       </Button>
-                      <Button variant="gold" size="xl" onClick={handleSaveShowtime} className="px-12 h-14 rounded-2xl shadow-xl uppercase tracking-widest text-xs font-bold">
-                         Save Showtime
+                      <Button
+                        variant="gold"
+                        size="xl"
+                        onClick={handleSaveShowtime}
+                        disabled={isCreating}
+                        className="px-12 h-14 rounded-2xl shadow-xl uppercase tracking-widest text-xs font-bold"
+                      >
+                         {isCreating ? (
+                           <>
+                             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                             Creating...
+                           </>
+                         ) : (
+                           'Save Showtime'
+                         )}
                       </Button>
                    </div>
                 </div>

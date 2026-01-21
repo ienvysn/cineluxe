@@ -36,12 +36,11 @@ import { cn } from "../../lib/utils";
 import { apiCall } from "../../../api";
 
 const AdminScreens = () => {
-  const screen = apiCall("GET", "/screens");
-
-  const [screenList, setScreenList] = useState(initialScreens);
+  const [screenList, setScreenList] = useState([]);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedScreen, setSelectedScreen] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -50,13 +49,33 @@ const AdminScreens = () => {
     seatsPerRow: 12,
   });
 
+  const fetchScreens = async () => {
+    try {
+      const data = await apiCall("GET", "/screens");
+      setScreenList(data);
+    } catch (error) {
+      console.error("Failed to fetch screens:", error);
+      toast.error("Fetch Failed", {
+        description: "Could not load screens from server.",
+      });
+      // Fallback to initialScreens if fetch fails totally or for development
+      setScreenList(initialScreens);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchScreens();
+  }, []);
+
   const resetForm = () => {
     setFormData({ name: "", rows: 8, seatsPerRow: 12 });
     setSelectedScreen(null);
   };
 
   const handleSaveScreen = async () => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("cineluxe_token");
 
     if (!formData.name) {
       toast.error("Name Missing", {
@@ -64,6 +83,7 @@ const AdminScreens = () => {
       });
       return;
     }
+    console.log(formData.rows);
     const rows = parseInt(formData.rows);
     const seatsPerRow = parseInt(formData.seatsPerRow);
 
@@ -95,19 +115,15 @@ const AdminScreens = () => {
       return;
     }
 
+    console.log(typeof rows);
     const screenData = {
-      id: selectedScreen?.id || `screen-${Date.now()}`,
       name: formData.name,
       rows: rows,
       seatsPerRow: seatsPerRow,
+      capacity: rows * seatsPerRow,
     };
-
     try {
       if (selectedScreen) {
-        setScreenList((prev) =>
-          prev.map((s) => (s.id === selectedScreen.id ? screenData : s))
-        );
-
         // API Call
         await apiCall("PUT", `/screens/${selectedScreen.id}`, {
           data: screenData,
@@ -118,8 +134,6 @@ const AdminScreens = () => {
           description: `"${screenData.name}" details have been saved.`,
         });
       } else {
-        setScreenList((prev) => [...prev, screenData]);
-
         // API Call
         await apiCall("POST", "/screens", {
           data: screenData,
@@ -131,13 +145,13 @@ const AdminScreens = () => {
         });
       }
 
+      await fetchScreens();
       setIsAddDialogOpen(false);
       resetForm();
     } catch (error) {
       console.error("Failed to save screen:", error);
       toast.error("Save Failed", {
-        description:
-          "There was a problem saving your screen. Please try again.",
+        description: error.message || "There was a problem saving your screen.",
       });
     }
   };
@@ -247,24 +261,6 @@ const AdminScreens = () => {
                 </div>
               </div>
             </div>
-
-            <div className="mt-8 pt-8 border-t border-white/5">
-              <p className="text-[9px] uppercase tracking-widest text-muted-foreground font-bold mb-4 flex items-center gap-2">
-                <Layout className="w-3 h-3 text-primary" /> Visual Preview
-              </p>
-              <div className="space-y-1 max-w-[200px]">
-                {[...Array(Math.min(screen.rows, 4))].map((_, i) => (
-                  <div key={i} className="flex gap-1">
-                    {[...Array(Math.min(screen.seatsPerRow, 8))].map((_, j) => (
-                      <div
-                        key={j}
-                        className="w-2.5 h-2.5 rounded-sm bg-white/5 border border-white/10"
-                      />
-                    ))}
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
         ))}
       </div>
@@ -291,7 +287,7 @@ const AdminScreens = () => {
                       style={{
                         gridTemplateColumns: `repeat(${Math.min(
                           Math.max(formData.seatsPerRow, 1),
-                          15
+                          15,
                         )}, minmax(0, 1fr))`,
                       }}
                     >
@@ -300,8 +296,8 @@ const AdminScreens = () => {
                           Math.min(
                             Math.max(formData.rows, 1) *
                               Math.max(formData.seatsPerRow, 1),
-                            150
-                          )
+                            150,
+                          ),
                         ),
                       ].map((_, i) => (
                         <div
@@ -355,7 +351,7 @@ const AdminScreens = () => {
                       onChange={(e) => {
                         const val = Math.max(
                           1,
-                          Math.min(parseInt(e.target.value) || 0, 25)
+                          Math.min(parseInt(e.target.value) || 0, 25),
                         );
                         setFormData({ ...formData, rows: val });
                       }}
@@ -374,7 +370,7 @@ const AdminScreens = () => {
                       onChange={(e) => {
                         const val = Math.max(
                           1,
-                          Math.min(parseInt(e.target.value) || 0, 25)
+                          Math.min(parseInt(e.target.value) || 0, 25),
                         );
                         setFormData({
                           ...formData,

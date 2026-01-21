@@ -8,6 +8,7 @@ const sequelize = new Sequelize("cineluxe", "postgres", "admin", {
 const connection = async () => {
   try {
     await sequelize.sync({ alter: true });
+    await sequelize.sync();
     console.log("Connected");
   } catch (error) {
     console.log("unable to connect", error.message);
