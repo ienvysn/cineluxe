@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { DateFilter } from "../components/movies/DateFilter";
 import { MovieCard } from "../components/movies/MovieCard";
 import { ComingSoonCard } from "../components/movies/ComingSoonCard";
-import { movies as mockMovies, showtimes, comingSoonMovies } from "../data/mockData";
+import { comingSoonMovies } from "../data/mockData";
 import { movieService } from "../services/movieService";
 import { Sparkles, Calendar, ChevronRight } from "lucide-react";
 import {
@@ -14,17 +14,23 @@ import {
 } from "../components/ui/carousel";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
+import { showtimeApi } from "../../api";
 
 const Index = () => {
   const today = new Date().toISOString().split("T")[0];
   const [selectedDate, setSelectedDate] = useState(today);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [movieList, setMovieList] = useState(mockMovies);
+  const [movieList, setMovieList] = useState([]);
+  const [showtimes, setShowtimes] = useState([]);
 
   useEffect(() => {
     setIsLoaded(true);
     fetchMovies();
   }, []);
+
+  useEffect(() => {
+    fetchShowtimes();
+  }, [selectedDate]);
 
   const fetchMovies = async () => {
     try {
@@ -37,15 +43,24 @@ const Index = () => {
     }
   };
 
+  const fetchShowtimes = async () => {
+    try {
+      const data = await showtimeApi.getByDate(selectedDate);
+      setShowtimes(data || []);
+    } catch (error) {
+      console.error("Failed to fetch showtimes:", error);
+      setShowtimes([]);
+    }
+  };
+
   // Filter movies that have showtimes on the selected date
   const availableMovieIds = new Set(
-    showtimes.filter((st) => st.date === selectedDate).map((st) => st.movieId)
+    showtimes.map((st) => st.movieId)
   );
 
   const filteredMovies = movieList.filter((movie) =>
     availableMovieIds.has(movie.id)
   );
-
 
   const displayMovies = filteredMovies.length > 0 ? filteredMovies : movieList;
 

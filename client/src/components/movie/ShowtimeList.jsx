@@ -1,19 +1,65 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Clock, Monitor, ChevronRight } from "lucide-react";
-import { showtimes, screens } from "../../data/mockData";
+import { Clock, Monitor, ChevronRight, Loader2 } from "lucide-react";
 import { cn } from "../../lib/utils";
+import { showtimeApi, screenApi } from "../../../api";
 
 export const ShowtimeList = ({ movieId, selectedDate }) => {
   const navigate = useNavigate();
+  const [showtimes, setShowtimes] = useState([]);
+  const [screens, setScreens] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const filteredShowtimes = showtimes.filter(
-    (st) => st.movieId === movieId && st.date === selectedDate
-  );
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
 
-  const screenIds = [...new Set(filteredShowtimes.map((st) => st.screenId))];
+        // Fetch showtimes and screens in parallel
+        const [showtimesData, screensData] = await Promise.all([
+          showtimeApi.getByMovie(movieId, selectedDate),
+          screenApi.getAll(),
+        ]);
 
-  if (filteredShowtimes.length === 0) {
+        setShowtimes(showtimesData || []);
+        setScreens(screensData || []);
+      } catch (err) {
+        console.error("Error fetching showtimes:", err);
+        setError(err.message || "Failed to load showtimes");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (movieId && selectedDate) {
+      fetchData();
+    }
+  }, [movieId, selectedDate]);
+
+  if (isLoading) {
+    return (
+      <div className="text-center py-16 px-6 glass-card rounded-[32px] animate-fade-in">
+        <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-4" />
+        <p className="text-muted-foreground italic font-light">
+          Loading showtimes...
+        </p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-16 px-6 glass-card border-dashed border-destructive/20 rounded-[32px] animate-fade-in">
+        <p className="text-destructive italic font-light">
+          {error}
+        </p>
+      </div>
+    );
+  }
+
+  if (showtimes.length === 0) {
     return (
       <div className="text-center py-16 px-6 glass-card border-dashed border-white/10 rounded-[32px] animate-fade-in">
         <p className="text-muted-foreground italic font-light">
@@ -23,6 +69,8 @@ export const ShowtimeList = ({ movieId, selectedDate }) => {
       </div>
     );
   }
+
+  const screenIds = [...new Set(showtimes.map((st) => st.screenId))];
 
   return (
     <div className="space-y-10 animate-fade-in">
@@ -39,7 +87,7 @@ export const ShowtimeList = ({ movieId, selectedDate }) => {
       <div className="grid gap-6">
         {screenIds.map((screenId) => {
           const screen = screens.find((s) => s.id === screenId);
-          const screenShowtimes = filteredShowtimes.filter(
+          const screenShowtimes = showtimes.filter(
             (st) => st.screenId === screenId
           );
 
@@ -53,7 +101,7 @@ export const ShowtimeList = ({ movieId, selectedDate }) => {
                   <div className="flex items-center gap-2 text-primary mb-2">
                     <Monitor className="w-4 h-4" />
                     <span className="text-[16px] uppercase font-black tracking-[1px]">
-                      {screen?.name}
+                      {screen?.name || 'Unknown Screen'}
                     </span>
                   </div>
                 </div>
@@ -66,7 +114,7 @@ export const ShowtimeList = ({ movieId, selectedDate }) => {
                       className="group/time relative px-8 py-4 rounded-2xl bg-white/5 border border-white/5 hover:border-primary/50 hover:bg-primary/10 transition-all duration-300 flex flex-col items-center gap-1 min-w-[120px]"
                     >
                       <span className="text-2xl font-display font-bold text-white group-hover/time:text-primary transition-colors tracking-tighter">
-                        {st.time}
+                        {st.time?.substring(0, 5) || st.time}
                       </span>
                       <span className="text-[9px] uppercase font-bold tracking-widest text-muted-foreground opacity-60 group-hover/time:opacity-100">
                         Book Now

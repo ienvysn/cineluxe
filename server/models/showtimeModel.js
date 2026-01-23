@@ -15,7 +15,7 @@ const Showtime = sequelize.define(
       type: DataTypes.UUID,
       allowNull: false,
       references: {
-        model: "Movies",
+        model: Movie,
         key: "id",
       },
       onDelete: "CASCADE",
@@ -25,7 +25,7 @@ const Showtime = sequelize.define(
       type: DataTypes.UUID,
       allowNull: false,
       references: {
-        model: "Screens",
+        model: Screen,
         key: "id",
       },
       onDelete: "CASCADE",
