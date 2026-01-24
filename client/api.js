@@ -6,7 +6,7 @@ export const apiCall = async (method, endpoint, options = {}) => {
   const { data, params, headers } = options;
 
   try {
-    const response = await axios({
+    const config = {
       method,
       url: `${BASE_URL}${endpoint}`,
       data,
@@ -15,7 +15,14 @@ export const apiCall = async (method, endpoint, options = {}) => {
         "Content-Type": "application/json",
         ...headers,
       },
-    });
+    };
+
+    const token = localStorage.getItem("cineluxe_token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    const response = await axios(config);
     return response?.data;
   } catch (error) {
     console.error("API Error:", error.message);
@@ -32,27 +39,4 @@ export const apiCall = async (method, endpoint, options = {}) => {
   }
 };
 
-
-export const showtimeApi = {
-  getAll: (filters) => apiCall("GET", "/showtimes", { params: filters }),
-  getById: (id) => apiCall("GET", `/showtimes/${id}`),
-  getByMovie: (movieId, date) => apiCall("GET", `/showtimes/movie/${movieId}`, { params: { date } }),
-  getByDate: (date) => apiCall("GET", `/showtimes/date/${date}`),
-  create: (data) => apiCall("POST", "/showtimes", { data }),
-  createRecurring: (data) => apiCall("POST", "/showtimes/recurring", { data }),
-  update: (id, data) => apiCall("PUT", `/showtimes/${id}`, { data }),
-  delete: (id) => apiCall("DELETE", `/showtimes/${id}`),
-  deleteMultiple: (ids) => apiCall("DELETE", "/showtimes/bulk/delete", { data: { ids } }),
-};
-
-
-export const movieApi = {
-  getAll: () => apiCall("GET", "/movies"),
-  getById: (id) => apiCall("GET", `/movies/${id}`),
-};
-
-export const screenApi = {
-  getAll: () => apiCall("GET", "/screens"),
-  getById: (id) => apiCall("GET", `/screens/${id}`),
-};
 

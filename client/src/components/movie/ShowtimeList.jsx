@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Clock, Monitor, ChevronRight, Loader2 } from "lucide-react";
 import { cn } from "../../lib/utils";
-import { showtimeApi, screenApi } from "../../../api";
+import { showtimeService } from "../../services/showtimeService";
+import { screenService } from "../../services/screenService";
 
 export const ShowtimeList = ({ movieId, selectedDate }) => {
   const navigate = useNavigate();
@@ -17,10 +18,10 @@ export const ShowtimeList = ({ movieId, selectedDate }) => {
         setIsLoading(true);
         setError(null);
 
-        // Fetch showtimes and screens in parallel
+
         const [showtimesData, screensData] = await Promise.all([
-          showtimeApi.getByMovie(movieId, selectedDate),
-          screenApi.getAll(),
+          showtimeService.getByMovie(movieId, selectedDate),
+          screenService.getAll(),
         ]);
 
         setShowtimes(showtimesData || []);

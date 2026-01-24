@@ -11,11 +11,11 @@ import {
   Wallet,
   ArrowRight,
   Ticket,
+  Loader2,
 } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "../components/ui/button";
-import { Badge } from "../components/ui/badge";
-import { showtimes, movies, screens, pricing } from "../data/mockData";
+import { showtimeService } from "../services/showtimeService";
 import { cn } from "../lib/utils";
 import { toast } from "sonner";
 
@@ -24,56 +24,72 @@ const BookingPage = () => {
   const navigate = useNavigate();
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-
-  const showtime = showtimes.find((st) => st.id === id);
-  const movie = showtime ? movies.find((m) => m.id === showtime.movieId) : null;
-  const screen = showtime
-    ? screens.find((s) => s.id === showtime.screenId)
-    : null;
+  const [showtime, setShowtime] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Simulate loading for premium feel
-    const timer = setTimeout(() => setIsLoading(false), 800);
-    return () => clearTimeout(timer);
-  }, []);
+    const fetchShowtimeDetails = async () => {
+      try {
+        setIsLoading(true);
+        const data = await showtimeService.getById(id);
+        setShowtime(data);
+      } catch (err) {
+        console.error("Failed to fetch showtime:", err);
+        setError("Failed to load showtime details.");
+        toast.error("Error", {
+          description: "Could not load showtime details.",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  //   if (!showtime || !movie || !screen) {
-  //     return (
-  //       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-  //         <h2 className="text-2xl font-display font-bold text-white mb-4">Showtime Not Found</h2>
-  //         <Button onClick={() => navigate('/')} variant="gold">Return Home</Button>
-  //       </div>
-  //     );
-  //   }
+    if (id) {
+      fetchShowtimeDetails();
+    }
+  }, [id]);
 
-  const rows = "ABCDEFGHIJ".split("").slice(0, screen.rows);
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#030303] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (error || !showtime) {
+    return (
+      <div className="min-h-screen bg-[#030303] flex flex-col items-center justify-center p-4">
+        <h2 className="text-2xl font-display font-bold text-white mb-4">
+          {error || "Showtime Not Found"}
+        </h2>
+        <Button onClick={() => navigate("/")} variant="gold">
+          Return Home
+        </Button>
+      </div>
+    );
+  }
+
+  const { movie, screen } = showtime;
+  const rows = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").slice(0, screen.rows);
   const seats = Array.from({ length: screen.seatsPerRow }, (_, i) => i + 1);
 
-  const isDiscountDay = () => {
-    const date = new Date(showtime.date);
-    return pricing.discountDays.includes(date.getDay());
-  };
-
+  // Using the price from the showtime object for now
   const getSeatPrice = (row) => {
-    const basePrice =
-      row === "A" || row === "B" ? pricing.frontRow : pricing.normal;
-    if (isDiscountDay()) {
-      return basePrice * (1 - pricing.discountPercent / 100);
-    }
-    return basePrice;
+    return Number(showtime.price);
   };
 
   const toggleSeat = (seatId) => {
     if (
-      showtime.bookedSeats.includes(seatId) ||
-      showtime.heldSeats.includes(seatId)
+      showtime.bookedSeats?.includes(seatId) ||
+      showtime.heldSeats?.includes(seatId)
     )
       return;
 
     setSelectedSeats((prev) =>
       prev.includes(seatId)
         ? prev.filter((s) => s !== seatId)
-        : [...prev, seatId]
+        : [...prev, seatId],
     );
   };
 
@@ -94,6 +110,9 @@ const BookingPage = () => {
         showtimeId: id,
         selectedSeats,
         totalAmount,
+        movie,
+        screen,
+        showtime,
       },
     });
   };
@@ -120,7 +139,7 @@ const BookingPage = () => {
                 </span>
                 <span className="w-1 h-1 rounded-full bg-white/20" />
                 <span className="flex items-center gap-1 font-display italic text-primary">
-                  {showtime.time}
+                  {showtime.time?.substring(0, 5) || showtime.time}
                 </span>
               </div>
             </div>
@@ -169,7 +188,7 @@ const BookingPage = () => {
                     <div className="flex gap-2.5">
                       {seats.map((seat) => {
                         const seatId = `${row}${seat}`;
-                        const isBooked = showtime.bookedSeats.includes(seatId);
+                        const isBooked = showtime.bookedSeats?.includes(seatId);
                         const isSelected = selectedSeats.includes(seatId);
 
                         return (
@@ -182,14 +201,14 @@ const BookingPage = () => {
                               isBooked
                                 ? "bg-white/[0.03] text-white/5 cursor-not-allowed border border-white/5"
                                 : isSelected
-                                ? "bg-primary text-black shadow-lg shadow-primary/20 scale-110 border-primary"
-                                : "bg-white/5 border border-white/10 text-muted-foreground hover:border-primary/50 hover:bg-primary/5"
+                                  ? "bg-primary text-black shadow-lg shadow-primary/20 scale-110 border-primary"
+                                  : "bg-white/5 border border-white/10 text-muted-foreground hover:border-primary/50 hover:bg-primary/5",
                             )}
                           >
                             <Armchair
                               className={cn(
                                 "w-4 h-4 md:w-5 md:h-5",
-                                isSelected ? "fill-current" : ""
+                                isSelected ? "fill-current" : "",
                               )}
                             />
                             {!isBooked && (
@@ -254,7 +273,7 @@ const BookingPage = () => {
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
                   <Clock className="w-4 h-4 text-primary" />
                   <span className="font-display font-bold text-white italic">
-                    {showtime.time}
+                    {showtime.time?.substring(0, 5) || showtime.time}
                   </span>
                 </div>
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -274,16 +293,6 @@ const BookingPage = () => {
                       : "None"}
                   </span>
                 </div>
-                {isDiscountDay() && (
-                  <div className="flex justify-between items-center text-success">
-                    <span className="text-[10px] font-bold uppercase tracking-widest">
-                      Weekday Offer
-                    </span>
-                    <Badge variant="success" className="text-[9px] px-2">
-                      -{pricing.discountPercent}%
-                    </Badge>
-                  </div>
-                )}
               </div>
             </div>
 
@@ -301,13 +310,7 @@ const BookingPage = () => {
                     key={seatId}
                     className="flex justify-between items-center text-sm font-light"
                   >
-                    <span className="text-muted-foreground">
-                      Seat {seatId} (
-                      {seatId.charAt(0) === "A" || seatId.charAt(0) === "B"
-                        ? "Front"
-                        : "Standard"}
-                      )
-                    </span>
+                    <span className="text-muted-foreground">Seat {seatId}</span>
                     <span className="text-white font-medium">
                       NPR {getSeatPrice(seatId.charAt(0))}
                     </span>
@@ -345,5 +348,4 @@ const BookingPage = () => {
     </div>
   );
 };
-
 export default BookingPage;

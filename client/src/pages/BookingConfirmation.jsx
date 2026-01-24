@@ -5,16 +5,16 @@ import {
   CheckCircle,
   Calendar,
   Clock,
-  MapPin,
+
   Ticket,
   Copy,
-  Download,
-  Share2,
+
   Loader2,
   AlertCircle,
   ChevronRight
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { getPosterUrl } from '../lib/utils';
 
 const BookingConfirmation = () => {
   const location = useLocation();
@@ -128,7 +128,7 @@ const BookingConfirmation = () => {
 
             <div className="flex gap-6 items-center p-6 bg-white/[0.02] border border-white/5 rounded-3xl">
               <img
-                src={movie.poster}
+                src={getPosterUrl(movie.poster)}
                 alt={movie.title}
                 className="w-20 h-28 object-cover rounded-xl shadow-2xl border border-white/10"
               />
@@ -193,14 +193,7 @@ const BookingConfirmation = () => {
             </Link>
           </div>
 
-          <div className="px-10 pb-10 flex justify-center gap-8 border-t border-white/5 pt-8">
-            <button className="flex items-center gap-2 text-[9px] text-muted-foreground hover:text-primary transition-colors font-bold uppercase tracking-widest">
-              <Download className="w-3 h-3" /> Save PDF
-            </button>
-            <button className="flex items-center gap-2 text-[9px] text-muted-foreground hover:text-primary transition-colors font-bold uppercase tracking-widest">
-              <Share2 className="w-3 h-3" /> Share Access
-            </button>
-          </div>
+
         </div>
       </div>
     </div>

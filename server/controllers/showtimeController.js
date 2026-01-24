@@ -353,23 +353,18 @@ const deleteMultipleShowtimes = async (req, res) => {
     const { ids } = req.body;
 
     if (!ids || !Array.isArray(ids) || ids.length === 0) {
-      return res.status(400).json({ error: "Array of IDs is required" });
+      return res.status(400).json({ error: "No showtime IDs provided" });
     }
 
     const deleted = await Showtime.destroy({
       where: {
-        id: {
-          [Op.in]: ids,
-        },
+        id: ids,
       },
     });
 
-    res.status(200).json({
-      deleted,
-      message: `${deleted} showtime(s) deleted`,
-    });
+    res.status(200).json({ message: `${deleted} showtimes deleted successfully` });
   } catch (error) {
-    console.error("Error deleting showtimes:", error);
+    console.error("Error deleting multiple showtimes:", error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -385,3 +380,4 @@ module.exports = {
   deleteShowtime,
   deleteMultipleShowtimes,
 };
+

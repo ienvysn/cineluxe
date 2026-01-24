@@ -50,16 +50,18 @@ export const Header = () => {
                   </Button>
                 </Link>
               )}
-              <Link to="/bookings">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="gap-2 hover:bg-white/5"
-                >
-                  <Ticket className="w-4 h-4" />
-                  <span className="hidden sm:inline">My Bookings</span>
-                </Button>
-              </Link>
+              {user.role !== "admin" && (
+                <Link to="/bookings">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="gap-2 hover:bg-white/5"
+                  >
+                    <Ticket className="w-4 h-4" />
+                    <span className="hidden sm:inline">My Bookings</span>
+                  </Button>
+                </Link>
+              )}
               <div className="flex items-center gap-2 ml-2 pl-4 border-l border-white/10">
                 <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xs">
                   {(user.fullName || user.name || "U")[0].toUpperCase()}

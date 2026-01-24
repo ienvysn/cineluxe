@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Search,
   Filter,
@@ -12,11 +12,11 @@ import {
   Wallet,
   ArrowUpRight,
   Calendar as CalendarIcon,
+  Loader2,
 } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
-import { Label } from "../../components/ui/label";
 import { Badge } from "../../components/ui/badge";
 import {
   Select,
@@ -28,64 +28,58 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
 } from "../../components/ui/dialog";
-import { movies, screens, showtimes } from "../../data/mockData";
-import { cn } from "../../lib/utils";
-
-const mockBookings = [
-  {
-    id: "BK12345",
-    movieId: "1",
-    showtimeId: "1-screen-1-2024-12-03-14:00",
-    seats: ["E5", "E6", "E7"],
-    totalAmount: 900,
-    status: "confirmed",
-    pin: "7834",
-    createdAt: new Date().toISOString(),
-    userId: "user1",
-  },
-  {
-    id: "BK12346",
-    movieId: "2",
-    showtimeId: "2-screen-2-2024-12-03-17:00",
-    seats: ["D8", "D9"],
-    totalAmount: 600,
-    status: "confirmed",
-    pin: "2156",
-    createdAt: new Date(Date.now() - 86400000).toISOString(),
-    userId: "user2",
-  },
-  {
-    id: "BK12347",
-    movieId: "3",
-    showtimeId: "3-screen-1-2024-12-02-20:00",
-    seats: ["F10"],
-    totalAmount: 300,
-    status: "cancelled",
-    pin: "9421",
-    createdAt: new Date(Date.now() - 172800000).toISOString(),
-    userId: "user3",
-  },
-];
+import { cn, getPosterUrl } from "../../lib/utils";
+import { bookingService } from "../../services/bookingService";
+import { toast } from "sonner";
 
 const AdminBookings = () => {
-  const [bookings] = useState(mockBookings);
+  const [bookings, setBookings] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [movieFilter, setMovieFilter] = useState("all");
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
 
+  useEffect(() => {
+    fetchBookings();
+  }, []);
+
+  const fetchBookings = async () => {
+    try {
+      setIsLoading(true);
+      const data = await bookingService.getAll();
+      setBookings(data);
+    } catch (error) {
+      console.error("Failed to fetch bookings:", error);
+      toast.error("Error fetching bookings");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Extract unique movies for filter
+  const uniqueMovies = Array.from(
+    new Map(
+      bookings
+        .filter((b) => b.showtime?.movie)
+        .map((b) => [b.showtime.movie.id, b.showtime.movie])
+    ).values()
+  );
+
   const filteredBookings = bookings.filter((booking) => {
     const matchesSearch =
       booking.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      booking.pin.includes(searchQuery);
+      booking.pin.includes(searchQuery) ||
+      booking.guestEmail?.toLowerCase().includes(searchQuery.toLowerCase());
+
     const matchesStatus =
       statusFilter === "all" || booking.status === statusFilter;
+
     const matchesMovie =
-      movieFilter === "all" || booking.movieId === movieFilter;
+      movieFilter === "all" || booking.showtime?.movieId === movieFilter;
+
     return matchesSearch && matchesStatus && matchesMovie;
   });
 
@@ -123,40 +117,13 @@ const AdminBookings = () => {
     }
   };
 
-  const handleExportCSV = () => {
-    const headers = [
-      "Booking ID",
-      "Movie",
-      "Date",
-      "Time",
-      "Seats",
-      "Amount",
-      "Status",
-    ];
-    const rows = filteredBookings.map((booking) => {
-      const movie = movies.find((m) => m.id === booking.movieId);
-      const showtime = showtimes.find((s) => s.id === booking.showtimeId);
-      return [
-        booking.id,
-        movie?.title || "N/A",
-        showtime?.date || "N/A",
-        showtime?.time || "N/A",
-        booking.seats.join(", "),
-        `NPR ${booking.totalAmount}`,
-        booking.status,
-      ];
-    });
-
-    const csvContent = [headers, ...rows]
-      .map((row) => row.join(","))
-      .join("\n");
-    const blob = new Blob([csvContent], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `bookings-${format(new Date(), "yyyy-MM-dd")}.csv`;
-    a.click();
-  };
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full min-h-[400px]">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-12 animate-fade-in">
@@ -175,10 +142,10 @@ const AdminBookings = () => {
             View and manage all customer movie bookings.
           </p>
         </div>
-        {/* <Button variant="outline" onClick={handleExportCSV} className="h-14 px-8 rounded-2xl border-white/10 hover:bg-white/5 transition-all text-muted-foreground hover:text-white font-bold uppercase tracking-widest text-[10px]">
-          <Download className="w-4 h-4 mr-3" />
-          Download CSV
-        </Button> */}
+        <Button variant="outline" onClick={fetchBookings} className="h-14 px-8 rounded-2xl border-white/10 hover:bg-white/5 transition-all text-muted-foreground hover:text-white font-bold uppercase tracking-widest text-[10px]">
+          <TrendingUp className="w-4 h-4 mr-3" />
+          Refresh Data
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -205,7 +172,7 @@ const AdminBookings = () => {
             label: "Total Revenue",
             value: `NPR ${bookings
               .filter((b) => b.status !== "cancelled")
-              .reduce((sum, b) => sum + b.totalAmount, 0)
+              .reduce((sum, b) => sum + Number(b.totalAmount), 0)
               .toLocaleString()}`,
             icon: Wallet,
             color: "text-primary",
@@ -237,7 +204,7 @@ const AdminBookings = () => {
         <div className="flex-1 min-w-[300px] relative">
           <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
           <Input
-            placeholder="Search by Booking ID or PIN..."
+            placeholder="Search by Booking ID, PIN or Email..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-14 h-14 bg-transparent border-white/5 rounded-2xl"
@@ -263,7 +230,7 @@ const AdminBookings = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Movies</SelectItem>
-              {movies.map((movie) => (
+              {uniqueMovies.map((movie) => (
                 <SelectItem key={movie.id} value={movie.id}>
                   {movie.title}
                 </SelectItem>
@@ -290,10 +257,9 @@ const AdminBookings = () => {
             <tbody className="divide-y divide-white/5">
               {filteredBookings.length > 0 ? (
                 filteredBookings.map((booking) => {
-                  const movie = movies.find((m) => m.id === booking.movieId);
-                  const showtime = showtimes.find(
-                    (s) => s.id === booking.showtimeId
-                  );
+                  const movie = booking.showtime?.movie;
+                  const showtime = booking.showtime;
+
                   return (
                     <tr
                       key={booking.id}
@@ -302,7 +268,7 @@ const AdminBookings = () => {
                       <td className="p-8">
                         <div className="flex flex-col">
                           <span className="font-mono text-sm font-bold text-white group-hover:text-primary transition-colors">
-                            {booking.id}
+                            {booking.id.substring(0, 8)}...
                           </span>
                           <span className="text-[9px] uppercase tracking-widest text-muted-foreground mt-1">
                             PIN: {booking.pin}
@@ -312,7 +278,7 @@ const AdminBookings = () => {
                       <td className="p-8">
                         <div className="flex items-center gap-4">
                           <img
-                            src={movie?.poster}
+                            src={getPosterUrl(movie?.poster)}
                             alt={movie?.title}
                             className="w-10 h-14 object-cover rounded-xl border border-white/10"
                           />
@@ -328,7 +294,7 @@ const AdminBookings = () => {
                               {format(new Date(showtime.date), "MMM dd, yyyy")}
                             </span>
                             <span className="text-sm font-bold text-primary">
-                              {showtime.time}
+                              {showtime.time?.substring(0, 5) || showtime.time}
                             </span>
                           </div>
                         ) : (
@@ -339,7 +305,7 @@ const AdminBookings = () => {
                       </td>
                       <td className="p-8">
                         <div className="flex flex-wrap gap-1.5 max-w-[120px]">
-                          {booking.seats.map((seat) => (
+                          {booking.seats?.map((seat) => (
                             <span
                               key={seat}
                               className="px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-[9px] font-bold text-muted-foreground"
@@ -350,7 +316,7 @@ const AdminBookings = () => {
                         </div>
                       </td>
                       <td className="p-8 font-bold text-white italic">
-                        NPR {booking.totalAmount}
+                        NPR {Number(booking.totalAmount).toLocaleString()}
                       </td>
                       <td className="p-8">{getStatusBadge(booking.status)}</td>
                       <td className="p-8 text-right">
@@ -384,45 +350,29 @@ const AdminBookings = () => {
 
       <Dialog open={isDetailDialogOpen} onOpenChange={setIsDetailDialogOpen}>
         <DialogContent className="max-w-2xl rounded-[40px] border-white/5 bg-[#070707] shadow-2xl p-0 overflow-hidden">
-          {selectedBooking && (
+          {selectedBooking && selectedBooking.showtime && selectedBooking.showtime.movie && (
             <>
               <div className="bg-[#0A0A0A] p-10 border-b border-white/5 flex flex-col md:flex-row items-center gap-8">
                 <img
-                  src={
-                    movies.find((m) => m.id === selectedBooking.movieId)?.poster
-                  }
+                  src={getPosterUrl(selectedBooking.showtime.movie.poster)}
                   alt="Poster"
                   className="w-32 h-48 object-cover rounded-[32px] shadow-2xl border border-white/10"
                 />
                 <div className="flex-1 text-center md:text-left">
                   <h3 className="text-4xl font-display font-bold text-white mb-2 italic tracking-tighter">
-                    {
-                      movies.find((m) => m.id === selectedBooking.movieId)
-                        ?.title
-                    }
+                    {selectedBooking.showtime.movie.title}
                   </h3>
                   <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-muted-foreground">
                     <span className="flex items-center gap-2 text-sm">
                       <CalendarIcon className="w-4 h-4 text-primary" />{" "}
-                      {showtimes.find(
-                        (s) => s.id === selectedBooking.showtimeId
-                      )?.date &&
-                        format(
-                          new Date(
-                            showtimes.find(
-                              (s) => s.id === selectedBooking.showtimeId
-                            ).date
-                          ),
-                          "MMM dd, yyyy"
-                        )}
+                      {format(new Date(selectedBooking.showtime.date), "MMM dd, yyyy")}
                     </span>
                     <span className="flex items-center gap-2 text-sm font-bold text-primary">
                       <Clock className="w-4 h-4" />{" "}
-                      {
-                        showtimes.find(
-                          (s) => s.id === selectedBooking.showtimeId
-                        )?.time
-                      }
+                      {selectedBooking.showtime.time?.substring(0, 5) || selectedBooking.showtime.time}
+                    </span>
+                    <span className="flex items-center gap-2 text-sm">
+                         <Badge variant="outline" className="border-white/10">{selectedBooking.showtime.screen?.name}</Badge>
                     </span>
                   </div>
                 </div>
@@ -441,7 +391,7 @@ const AdminBookings = () => {
                     },
                     {
                       label: "Total Paid",
-                      value: `NPR ${selectedBooking.totalAmount}`,
+                      value: `NPR ${Number(selectedBooking.totalAmount).toLocaleString()}`,
                     },
                     {
                       label: "Booked On",
@@ -450,6 +400,14 @@ const AdminBookings = () => {
                         "MMM dd, yyyy HH:mm"
                       ),
                     },
+                    {
+                        label: "Payment Method",
+                        value: selectedBooking.paymentMethod,
+                    },
+                    {
+                        label: "User",
+                        value: selectedBooking.guestEmail ? `Guest (${selectedBooking.guestEmail})` : 'Registered User',
+                    }
                   ].map((item, i) => (
                     <div
                       key={i}

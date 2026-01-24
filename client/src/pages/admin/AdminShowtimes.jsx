@@ -21,7 +21,9 @@ import { Checkbox } from '../../components/ui/checkbox';
 import { toast } from 'sonner';
 import { Badge } from '../../components/ui/badge';
 import { cn } from '../../lib/utils';
-import { showtimeApi, movieApi, screenApi } from '../../../api';
+import { showtimeService } from "../../services/showtimeService";
+import { movieService } from "../../services/movieService";
+import { screenService } from "../../services/screenService";
 
 const AdminShowtimes = () => {
   const [scheduledShows, setScheduledShows] = useState([]);
@@ -58,8 +60,8 @@ const AdminShowtimes = () => {
     try {
       setIsLoading(true);
       const [moviesData, screensData] = await Promise.all([
-        movieApi.getAll(),
-        screenApi.getAll(),
+        movieService.getAllMovies(),
+        screenService.getAll(),
       ]);
       setMovies(moviesData);
       setScreens(screensData);
@@ -79,7 +81,7 @@ const AdminShowtimes = () => {
       if (filterMovie !== 'all') filters.movieId = filterMovie;
       if (filterDate) filters.date = filterDate;
 
-      const data = await showtimeApi.getAll(filters);
+      const data = await showtimeService.getAll(filters);
       setScheduledShows(data);
     } catch (error) {
       console.error('Error loading showtimes:', error);
@@ -115,7 +117,7 @@ const AdminShowtimes = () => {
 
       if (addMode === 'single') {
         // Create single showtime
-        await showtimeApi.create({
+        await showtimeService.create({
           movieId: formData.movieId,
           screenId: formData.screenId,
           date: formData.date,
@@ -132,7 +134,7 @@ const AdminShowtimes = () => {
         const startDate = formData.date;
         const endDate = format(addDays(new Date(formData.date), formData.recurringDays - 1), 'yyyy-MM-dd');
 
-        const result = await showtimeApi.createRecurring({
+        const result = await showtimeService.createRecurring({
           movieId: formData.movieId,
           screenId: formData.screenId,
           startDate,
@@ -161,7 +163,7 @@ const AdminShowtimes = () => {
 
   const handleDeleteShowtime = async (id) => {
     try {
-      await showtimeApi.delete(id);
+      await showtimeService.delete(id);
       toast.success('Showtime Removed', {
         description: 'The show has been deleted from the schedule.',
       });

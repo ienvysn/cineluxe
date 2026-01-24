@@ -32,8 +32,8 @@ import {
 import { toast } from "sonner";
 import { screens as initialScreens } from "../../data/mockData";
 import { Badge } from "../../components/ui/badge";
-import { cn } from "../../lib/utils";
-import { apiCall } from "../../../api";
+import { screenService } from "../../services/screenService";
+
 
 const AdminScreens = () => {
   const [screenList, setScreenList] = useState([]);
@@ -51,7 +51,7 @@ const AdminScreens = () => {
 
   const fetchScreens = async () => {
     try {
-      const data = await apiCall("GET", "/screens");
+      const data = await screenService.getAll();
       setScreenList(data);
     } catch (error) {
       console.error("Failed to fetch screens:", error);
@@ -125,20 +125,14 @@ const AdminScreens = () => {
     try {
       if (selectedScreen) {
         // API Call
-        await apiCall("PUT", `/screens/${selectedScreen.id}`, {
-          data: screenData,
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        await screenService.update(selectedScreen.id, screenData, token);
 
         toast.success("Screen Updated", {
           description: `"${screenData.name}" details have been saved.`,
         });
       } else {
         // API Call
-        await apiCall("POST", "/screens", {
-          data: screenData,
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        await screenService.create(screenData, token);
 
         toast.success("Screen Added", {
           description: `"${screenData.name}" is now ready for showtimes.`,
@@ -156,12 +150,21 @@ const AdminScreens = () => {
     }
   };
 
-  const handleDeleteScreen = () => {
+  const handleDeleteScreen = async () => {
     if (selectedScreen) {
-      setScreenList((prev) => prev.filter((s) => s.id !== selectedScreen.id));
-      toast.success("Screen Removed", {
-        description: "The screen has been deleted from your cinema.",
-      });
+      try {
+        const token = localStorage.getItem("cineluxe_token");
+        await screenService.delete(selectedScreen.id, token);
+        setScreenList((prev) => prev.filter((s) => s.id !== selectedScreen.id));
+        toast.success("Screen Removed", {
+          description: "The screen has been deleted from your cinema.",
+        });
+      } catch (error) {
+        console.error("Failed to delete screen:", error);
+        toast.error("Delete Failed", {
+          description: error.message || "Could not delete screen.",
+        });
+      }
     }
     setIsDeleteDialogOpen(false);
     setSelectedScreen(null);

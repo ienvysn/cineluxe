@@ -1,5 +1,7 @@
 const express = require("express");
 const router = express.Router();
+const authenticate = require("../middleware/authMiddleware");
+const authorizeAdmin = require("../middleware/adminMiddleware");
 const {
   createShowtime,
   createRecurringShowtimes,
@@ -12,21 +14,17 @@ const {
   deleteMultipleShowtimes,
 } = require("../controllers/showtimeController");
 
-// Create routes
-router.post("/", createShowtime);
-router.post("/recurring", createRecurringShowtimes);
+router.post("/", authenticate, authorizeAdmin, createShowtime);
+router.post("/recurring", authenticate, authorizeAdmin, createRecurringShowtimes);
 
-// Read routes
 router.get("/", getAllShowtimes);
 router.get("/:id", getShowtimeById);
 router.get("/movie/:movieId", getShowtimesByMovie);
 router.get("/date/:date", getShowtimesByDate);
 
-// Update route
-router.put("/:id", updateShowtime);
+router.put("/:id", authenticate, authorizeAdmin, updateShowtime);
 
-// Delete routes
-router.delete("/:id", deleteShowtime);
-router.delete("/bulk/delete", deleteMultipleShowtimes);
+router.delete("/:id", authenticate, authorizeAdmin, deleteShowtime);
+router.delete("/bulk/delete", authenticate, authorizeAdmin, deleteMultipleShowtimes);
 
 module.exports = router;

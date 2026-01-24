@@ -13,8 +13,8 @@ import {
   CarouselPrevious,
 } from "../components/ui/carousel";
 import { Button } from "../components/ui/button";
-import { Badge } from "../components/ui/badge";
-import { showtimeApi } from "../../api";
+
+import { showtimeService } from "../services/showtimeService";
 
 const Index = () => {
   const today = new Date().toISOString().split("T")[0];
@@ -45,7 +45,7 @@ const Index = () => {
 
   const fetchShowtimes = async () => {
     try {
-      const data = await showtimeApi.getByDate(selectedDate);
+      const data = await showtimeService.getByDate(selectedDate);
       setShowtimes(data || []);
     } catch (error) {
       console.error("Failed to fetch showtimes:", error);
