@@ -109,10 +109,7 @@ const PaymentPage = () => {
               <h2 className="text-lg font-bold text-white leading-tight font-display tracking-tight">
                 Secure <span className="text-primary italic">Checkout</span>
               </h2>
-              <div className="hidden sm:flex items-center gap-2 text-[8px] uppercase tracking-[3px] text-muted-foreground font-bold mt-0.5">
-                <ShieldCheck className="w-3 h-3 text-success" />
-                256-bit Executive Encryption
-              </div>
+
             </div>
           </div>
         </div>

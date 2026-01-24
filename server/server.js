@@ -28,6 +28,7 @@ app.use("/api/movies", movieRoute);
 app.use("/api/screens", screenRoute);
 app.use("/api/showtimes", showtimeRoute);
 app.use("/api/bookings", bookingRoute);
+app.use("/api/dashboard", require("./routes/dashboardRoutes"));
 
 app.listen(port, () => {
   console.log(`Server Running at port : ${port}`);

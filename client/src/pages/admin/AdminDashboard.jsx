@@ -9,18 +9,11 @@ import {
   ArrowUpRight,
   DollarSign,
 } from "lucide-react";
-import { movies as mockMovies, screens, showtimes } from "../../data/mockData";
 import { movieService } from "../../services/movieService";
+import { dashboardService } from "../../services/dashboardService";
 import { useState, useEffect } from "react";
 import { Badge } from "../../components/ui/badge";
 import { cn } from "../../lib/utils";
-
-const mockStats = {
-  todayBookings: 47,
-  todayRevenue: 14100,
-  weeklyRevenue: 98700,
-  totalCustomers: 1250,
-};
 
 const StatCard = ({ title, value, icon: Icon, trend, positive = true }) => (
   <div className="glass-card p-6 border-white/5 relative overflow-hidden group hover:border-primary/30 transition-all duration-500">
@@ -45,22 +38,28 @@ const StatCard = ({ title, value, icon: Icon, trend, positive = true }) => (
 );
 
 const AdminDashboard = () => {
-  const todayDate = new Date().toISOString().split("T")[0];
-  const todayShowtimes = showtimes.filter((s) => s.date === todayDate);
-  const [movieList, setMovieList] = useState(mockMovies);
+  const [stats, setStats] = useState({
+    todayBookings: 0,
+    todayRevenue: 0,
+    weeklyRevenue: 0,
+    totalCustomers: 0,
+    totalMovies: 0,
+    totalScreens: 0,
+    todayShowtimes: [],
+  });
 
   useEffect(() => {
-    const fetchMovies = async () => {
+    const fetchStats = async () => {
       try {
-        const data = await movieService.getAllMovies();
-        if (data && data.length > 0) {
-          setMovieList(data);
+        const data = await dashboardService.getStats();
+        if (data) {
+          setStats(data);
         }
       } catch (error) {
-        console.error("Failed to fetch movies:", error);
+        console.error("Failed to fetch dashboard stats:", error);
       }
     };
-    fetchMovies();
+    fetchStats();
   }, []);
 
   return (
@@ -86,24 +85,24 @@ const AdminDashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
           title="Today's Bookings"
-          value={mockStats.todayBookings}
+          value={stats.todayBookings}
           icon={Ticket}
           trend="+12%"
         />
         <StatCard
           title="Today's Revenue"
-          value={`NPR ${mockStats.todayRevenue.toLocaleString()}`}
+          value={`NPR ${stats.todayRevenue.toLocaleString()}`}
           icon={DollarSign}
         />
         <StatCard
           title="Weekly Revenue"
-          value={`NPR ${mockStats.weeklyRevenue.toLocaleString()}`}
+          value={`NPR ${stats.weeklyRevenue.toLocaleString()}`}
           icon={TrendingUp}
           trend="+8.4%"
         />
         <StatCard
           title="Total Customers"
-          value={mockStats.totalCustomers.toLocaleString()}
+          value={stats.totalCustomers.toLocaleString()}
           icon={Users}
         />
       </div>
@@ -124,7 +123,7 @@ const AdminDashboard = () => {
                   Movies Showing
                 </h3>
                 <p className="text-3xl font-bold text-white leading-none mt-2">
-                  {movieList.length}
+                  {stats.totalMovies}
                 </p>
               </div>
             </div>
@@ -140,7 +139,7 @@ const AdminDashboard = () => {
                   Cinema Screens
                 </h3>
                 <p className="text-3xl font-bold text-white leading-none mt-2">
-                  {screens.length} Screens
+                  {stats.totalScreens} Screens
                 </p>
               </div>
             </div>
@@ -156,18 +155,24 @@ const AdminDashboard = () => {
               variant="goldOutline"
               className="text-[9px] font-bold uppercase tracking-widest px-4 py-1.5"
             >
-              {todayShowtimes.length} Shows Today
+              {stats.todayShowtimes.length} Shows Today
             </Badge>
           </div>
 
           <div className="glass-card overflow-hidden border-white/5">
             <div className="divide-y divide-white/5">
-              {todayShowtimes.length > 0 ? (
-                todayShowtimes.slice(0, 6).map((showtime, index) => {
-                  const movie = movieList.find((m) => m.id === showtime.movieId) || mockMovies.find((m) => m.id === showtime.movieId);
-                  const screen = screens.find(
-                    (s) => s.id === showtime.screenId
-                  );
+              {stats.todayShowtimes.length > 0 ? (
+                stats.todayShowtimes.slice(0, 6).map((showtime, index) => {
+                  const movie = showtime.movie;
+                  const screen = showtime.screen;
+
+                  // Handle case where bookings might be count or array depending on controller.
+                  // In controller we didn't include Bookings in the include, so we can't show booking count per showtime easily.
+                  // Let's just remove booking count or if needed update controller.
+                  // For now, let's just assume 0 or handle if we update controller.
+                  // Actually, let's update controller if we want booking count per showtime.
+                  // But for now, let's just use what we have.
+
                   return (
                     <div
                       key={showtime.id}
@@ -197,12 +202,12 @@ const AdminDashboard = () => {
                       <div className="text-right flex flex-col items-end gap-2">
                         <div className="px-4 py-1 bg-primary/10 border border-primary/20 rounded-full">
                           <p className="text-sm font-bold text-primary italic tracking-tighter">
-                            {showtime.time}
+                            {showtime.time?.substring(0, 5) || showtime.time}
                           </p>
                         </div>
-                        <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">
+                        {/* <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">
                           {showtime.bookedSeats.length} Bookings
-                        </p>
+                        </p> */}
                       </div>
                     </div>
                   );

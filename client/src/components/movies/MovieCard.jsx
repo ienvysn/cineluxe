@@ -4,7 +4,7 @@ import { Clock, Star, PlayCircle } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { cn, getPosterUrl } from "../../lib/utils";
 
-export const MovieCard = ({ movie }) => {
+export const MovieCard = ({ movie, selectedDate }) => {
   const formatDuration = (minutes) => {
     const hrs = Math.floor(minutes / 60);
     const mins = minutes % 60;
@@ -12,7 +12,11 @@ export const MovieCard = ({ movie }) => {
   };
 
   return (
-    <Link to={`/movie/${movie.id}`} className="group block h-full">
+    <Link
+      to={`/movie/${movie.id}`}
+      state={{ date: selectedDate }}
+      className="group block h-full"
+    >
       <div className="glass-card flex flex-col h-full overflow-hidden transition-all duration-500 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.7)] hover:-translate-y-2 border-white/5 hover:border-primary/20 bg-card/40 backdrop-blur-md">
         <div className="relative aspect-[2/3] overflow-hidden">
           <img

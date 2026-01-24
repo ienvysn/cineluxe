@@ -115,7 +115,7 @@ const Index = () => {
                   className="animate-slide-up"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
-                  <MovieCard movie={movie} />
+                  <MovieCard movie={movie} selectedDate={selectedDate} />
                 </div>
               ))}
             </div>

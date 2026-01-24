@@ -6,7 +6,7 @@ export const bookingService = {
       data,
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     }),
-  getAll: () => apiCall("GET", "/bookings"),
+  getAll: (params) => apiCall("GET", "/bookings", { params }),
   getById: (id) => apiCall("GET", `/bookings/${id}`),
   getUserBookings: () => apiCall("GET", "/bookings/user"),
 };

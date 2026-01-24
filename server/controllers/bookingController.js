@@ -3,6 +3,7 @@ const Showtime = require("../models/showtimeModel");
 const Movie = require("../models/movieModel");
 const Screen = require("../models/screenModel");
 const { sequelize } = require("../db/db");
+const { Op } = require("sequelize");
 
 const createBooking = async (req, res) => {
   const t = await sequelize.transaction();
@@ -81,7 +82,11 @@ const createBooking = async (req, res) => {
 
 const getAllBookings = async (req, res) => {
   try {
-    const bookings = await Booking.findAll({
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+
+    const { count, rows } = await Booking.findAndCountAll({
       include: [
         {
           model: Showtime,
@@ -93,9 +98,37 @@ const getAllBookings = async (req, res) => {
         },
       ],
       order: [["created_at", "DESC"]],
+      limit,
+      offset,
     });
 
-    res.status(200).json(bookings);
+    // Calculate global stats independent of pagination
+    const totalRevenue = await Booking.sum('totalAmount', {
+        where: {
+            status: { [Op.ne]: 'cancelled' }
+        }
+    });
+
+    const confirmedCount = await Booking.count({
+        where: { status: 'confirmed' }
+    });
+
+    const cancelledCount = await Booking.count({
+        where: { status: 'cancelled' }
+    });
+
+    res.status(200).json({
+      bookings: rows,
+      totalPages: Math.ceil(count / limit),
+      currentPage: page,
+      totalBookings: count,
+      stats: {
+          totalRevenue: totalRevenue || 0,
+          confirmedCount,
+          cancelledCount,
+          totalBookings: count
+      }
+    });
   } catch (error) {
     console.error("Error fetching bookings:", error);
     res.status(500).json({ error: error.message });

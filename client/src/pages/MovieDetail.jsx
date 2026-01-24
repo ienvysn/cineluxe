@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { movieService } from "../services/movieService";
 import { useEffect } from "react";
 import { MovieHero } from "../components/movie/MovieHero";
@@ -11,8 +11,9 @@ import { pricing } from "../data/mockData";
 const MovieDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const today = new Date().toISOString().split("T")[0];
-  const [selectedDate, setSelectedDate] = useState(today);
+  const [selectedDate, setSelectedDate] = useState(location.state?.date || today);
   const [movie, setMovie] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 

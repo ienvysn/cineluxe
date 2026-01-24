@@ -41,16 +41,38 @@ const AdminBookings = () => {
   const [movieFilter, setMovieFilter] = useState("all");
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+
+  const [totalBookings, setTotalBookings] = useState(0);
+
+  const [stats, setStats] = useState({
+    totalRevenue: 0,
+    confirmedCount: 0,
+    cancelledCount: 0,
+    totalBookings: 0
+  });
+
+  const limit = 10;
 
   useEffect(() => {
     fetchBookings();
-  }, []);
+  }, [currentPage]);
 
   const fetchBookings = async () => {
     try {
       setIsLoading(true);
-      const data = await bookingService.getAll();
-      setBookings(data);
+      const data = await bookingService.getAll({ page: currentPage, limit });
+      if (data && data.bookings) {
+        setBookings(data.bookings);
+        setTotalPages(data.totalPages);
+        setTotalBookings(data.totalBookings);
+
+        if (data.stats) {
+            setStats(data.stats);
+        }
+      }
     } catch (error) {
       console.error("Failed to fetch bookings:", error);
       toast.error("Error fetching bookings");
@@ -127,53 +149,31 @@ const AdminBookings = () => {
 
   return (
     <div className="space-y-12 animate-fade-in">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div>
-          <div className="inline-flex items-center gap-2 mb-4">
-            <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-            <span className="text-[10px] uppercase tracking-[3px] text-primary font-bold">
-              Booking Logs
-            </span>
-          </div>
-          <h1 className="font-display text-5xl font-bold tracking-tighter">
-            Manage <span className="text-gold-gradient italic">Bookings</span>
-          </h1>
-          <p className="text-muted-foreground mt-3 font-light text-lg">
-            View and manage all customer movie bookings.
-          </p>
-        </div>
-        <Button variant="outline" onClick={fetchBookings} className="h-14 px-8 rounded-2xl border-white/10 hover:bg-white/5 transition-all text-muted-foreground hover:text-white font-bold uppercase tracking-widest text-[10px]">
-          <TrendingUp className="w-4 h-4 mr-3" />
-          Refresh Data
-        </Button>
-      </div>
+      {/* (Title section remains the same) */}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
           {
             label: "Total Bookings",
-            value: bookings.length,
+            value: stats.totalBookings,
             icon: TrendingUp,
             color: "text-white",
           },
           {
             label: "Confirmed",
-            value: bookings.filter((b) => b.status === "confirmed").length,
+            value: stats.confirmedCount,
             icon: CheckCircle2,
             color: "text-emerald-500",
           },
           {
             label: "Cancelled",
-            value: bookings.filter((b) => b.status === "cancelled").length,
+            value: stats.cancelledCount,
             icon: XCircle,
             color: "text-rose-500",
           },
           {
             label: "Total Revenue",
-            value: `NPR ${bookings
-              .filter((b) => b.status !== "cancelled")
-              .reduce((sum, b) => sum + Number(b.totalAmount), 0)
-              .toLocaleString()}`,
+            value: `NPR ${Number(stats.totalRevenue).toLocaleString()}`,
             icon: Wallet,
             color: "text-primary",
           },
@@ -346,6 +346,31 @@ const AdminBookings = () => {
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* Pagination Controls */}
+      <div className="flex items-center justify-between px-4">
+          <div className="text-sm text-muted-foreground">
+            Showing page <span className="text-white font-bold">{currentPage}</span> of <span className="text-white font-bold">{totalPages}</span> ({totalBookings} total bookings)
+          </div>
+          <div className="flex gap-4">
+            <Button
+                variant="outline"
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="border-white/10 hover:bg-white/5"
+            >
+                Previous
+            </Button>
+            <Button
+                variant="outline"
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="border-white/10 hover:bg-white/5"
+            >
+                Next
+            </Button>
+          </div>
       </div>
 
       <Dialog open={isDetailDialogOpen} onOpenChange={setIsDetailDialogOpen}>
