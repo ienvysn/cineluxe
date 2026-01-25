@@ -69,7 +69,8 @@ const BookingConfirmation = () => {
     );
   }
 
-  const { bookingId, pin, movie, showtime, screen, seats, total, paymentMethod } = bookingData;
+  const { bookingId, bookingNumber, pin, movie, showtime, screen, seats, total, paymentMethod } = bookingData;
+  const displayId = bookingNumber || bookingId;
 
   const copyToClipboard = (text, label) => {
     navigator.clipboard.writeText(text);
@@ -110,10 +111,10 @@ const BookingConfirmation = () => {
           <div className="p-10 space-y-8 relative">
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="p-5 rounded-2xl bg-white/5 border border-white/5 hover:border-white/10 transition-all cursor-pointer" onClick={() => copyToClipboard(bookingId, 'Booking ID')}>
-                <p className="text-[9px] text-muted-foreground uppercase tracking-widest mb-2 font-bold opacity-50">Reference ID</p>
+              <div className="p-5 rounded-2xl bg-white/5 border border-white/5 hover:border-white/10 transition-all cursor-pointer" onClick={() => copyToClipboard(displayId, 'Booking Number')}>
+                <p className="text-[9px] text-muted-foreground uppercase tracking-widest mb-2 font-bold opacity-50">Booking Number</p>
                 <div className="flex items-center justify-between">
-                  <p className="font-mono text-sm font-bold text-white">{bookingId}</p>
+                  <p className="font-mono text-xl font-bold text-white">{displayId}</p>
                   <Copy className="w-3 h-3 text-muted-foreground" />
                 </div>
               </div>

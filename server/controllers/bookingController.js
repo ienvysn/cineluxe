@@ -40,6 +40,8 @@ const createBooking = async (req, res) => {
 
     const pin = Math.floor(1000 + Math.random() * 9000).toString();
 
+    const bookingNumber = Math.random().toString(36).substring(2, 8).toUpperCase();
+
     const booking = await Booking.create(
       {
         showtimeId,
@@ -48,7 +50,9 @@ const createBooking = async (req, res) => {
         totalAmount,
         paymentMethod,
         status: "confirmed",
+        isUsed: false,
         pin,
+        bookingNumber,
       },
       { transaction: t }
     );
@@ -187,9 +191,80 @@ const getUserBookings = async (req, res) => {
   }
 };
 
+const validateTicket = async (req, res) => {
+  try {
+    const { bookingId, pin } = req.body;
+
+    if (!bookingId || !pin) {
+      return res.status(400).json({ error: "Booking ID and PIN are required" });
+    }
+
+    // Use findOne to search by bookingNumber (or id if it happens to be one, though we prefer bookingNumber now)
+    // We search by bookingNumber primarily.
+    const booking = await Booking.findOne({
+      where: { bookingNumber: bookingId },
+      include: [
+        {
+            model: Showtime,
+            as: "showtime",
+            include: [
+              { model: Movie, as: "movie" },
+              { model: Screen, as: "screen" },
+            ],
+        }
+      ]
+    });
+
+    if (!booking) {
+        // Fallback: Optional, if we still want to support UUIDs we could check if it is a UUID and search by PK.
+        // But for now, let's just stick to the short code to avoid 500 errors on invalid UUIDs.
+      return res.status(404).json({ error: "Booking not found" });
+    }
+
+    if (String(booking.pin) !== String(pin)) {
+        return res.status(401).json({ error: "Invalid PIN" });
+    }
+
+    if (booking.status === 'cancelled') {
+        return res.status(400).json({ error: "This ticket has been cancelled" });
+    }
+
+    // Time Validation
+    const showtimeDate = booking.showtime.date;
+    const showtimeTime = booking.showtime.time;
+    const dateTimeString = `${showtimeDate}T${showtimeTime}`;
+    const showtimeStart = new Date(dateTimeString);
+    const validUntil = new Date(showtimeStart.getTime() + 60 * 60 * 1000); // +1 hour
+
+    const now = new Date();
+
+    if (now > validUntil) {
+       return res.status(400).json({ error: "Ticket expired. " });
+    }
+
+    if (booking.isUsed) {
+        return res.status(409).json({ error: "Ticket has already been used" });
+    }
+
+    booking.isUsed = true;
+    booking.status = 'completed';
+    await booking.save();
+
+    res.status(200).json({
+        message: "Ticket validated successfully",
+        booking
+    });
+
+  } catch (error) {
+    console.error("Error validating ticket:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   createBooking,
   getAllBookings,
   getBookingById,
   getUserBookings,
+  validateTicket,
 };

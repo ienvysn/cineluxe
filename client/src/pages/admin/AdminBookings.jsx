@@ -90,6 +90,21 @@ const AdminBookings = () => {
     ).values()
   );
 
+  const getBookingStatus = (booking) => {
+    if (booking.status === 'completed' || booking.isUsed) return 'Watched';
+    if (booking.status === 'cancelled') return 'Cancelled';
+
+    if (!booking.showtime || !booking.showtime.date || !booking.showtime.time) return 'Booked';
+
+    const showtimeDate = new Date(`${booking.showtime.date}T${booking.showtime.time}`);
+    const now = new Date();
+    // 3 hours buffer for movie duration
+    const movieEnd = new Date(showtimeDate.getTime() + 3 * 60 * 60 * 1000);
+
+    if (now > movieEnd) return 'No-show';
+    return 'Booked';
+  };
+
   const filteredBookings = bookings.filter((booking) => {
     const matchesSearch =
       booking.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -97,7 +112,7 @@ const AdminBookings = () => {
       booking.guestEmail?.toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesStatus =
-      statusFilter === "all" || booking.status === statusFilter;
+      statusFilter === "all" || getBookingStatus(booking) === statusFilter;
 
     const matchesMovie =
       movieFilter === "all" || booking.showtime?.movieId === movieFilter;
@@ -105,33 +120,46 @@ const AdminBookings = () => {
     return matchesSearch && matchesStatus && matchesMovie;
   });
 
-  const getStatusBadge = (status) => {
+
+
+  const getStatusBadge = (booking) => {
+    const status = getBookingStatus(booking);
+
     switch (status) {
-      case "confirmed":
-        return (
-          <Badge
-            variant="goldOutline"
-            className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 font-bold uppercase text-[9px] tracking-widest px-3 py-1"
-          >
-            Confirmed
-          </Badge>
-        );
-      case "cancelled":
+      case "Booked":
         return (
           <Badge
             variant="outline"
-            className="bg-rose-500/10 text-rose-500 border-rose-500/20 font-bold uppercase text-[9px] tracking-widest px-3 py-1"
+            className="bg-amber-500/10 text-amber-500 border-amber-500/20 font-bold uppercase text-[9px] tracking-widest px-3 py-1"
+          >
+            Booked
+          </Badge>
+        );
+      case "Cancelled":
+        return (
+          <Badge
+            variant="outline"
+            className="bg-white/5 text-muted-foreground border-white/10 font-bold uppercase text-[9px] tracking-widest px-3 py-1"
           >
             Cancelled
           </Badge>
         );
-      case "completed":
+      case "Watched":
         return (
           <Badge
-            variant="secondary"
-            className="bg-primary/10 text-primary border-primary/20 font-bold uppercase text-[9px] tracking-widest px-3 py-1"
+            variant="outline"
+            className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 font-bold uppercase text-[9px] tracking-widest px-3 py-1"
           >
-            Completed
+            Watched
+          </Badge>
+        );
+      case "No-show":
+        return (
+           <Badge
+            variant="outline"
+            className="bg-destructive/10 text-destructive border-destructive/20 font-bold uppercase text-[9px] tracking-widest px-3 py-1"
+          >
+            No-show
           </Badge>
         );
       default:
@@ -218,9 +246,10 @@ const AdminBookings = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="confirmed">Confirmed</SelectItem>
-              <SelectItem value="cancelled">Cancelled</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
+              <SelectItem value="Booked">Booked</SelectItem>
+              <SelectItem value="Watched">Watched</SelectItem>
+              <SelectItem value="No-show">No-show</SelectItem>
+              <SelectItem value="Cancelled">Cancelled</SelectItem>
             </SelectContent>
           </Select>
 
@@ -245,7 +274,7 @@ const AdminBookings = () => {
           <table className="w-full">
             <thead>
               <tr className="bg-white/[0.02] border-b border-white/5 text-[10px] uppercase tracking-[3px] font-bold text-muted-foreground">
-                <th className="text-left p-8">Booking ID</th>
+                <th className="text-left p-8">Booking Number</th>
                 <th className="text-left p-8">Movie</th>
                 <th className="text-left p-8">Date & Time</th>
                 <th className="text-left p-8">Seats</th>
@@ -268,7 +297,7 @@ const AdminBookings = () => {
                       <td className="p-8">
                         <div className="flex flex-col">
                           <span className="font-mono text-sm font-bold text-white group-hover:text-primary transition-colors">
-                            {booking.id.substring(0, 8)}...
+                            {(booking.bookingNumber || booking.id).substring(0, 10)}
                           </span>
                           <span className="text-[9px] uppercase tracking-widest text-muted-foreground mt-1">
                             PIN: {booking.pin}
@@ -318,7 +347,7 @@ const AdminBookings = () => {
                       <td className="p-8 font-bold text-white italic">
                         NPR {Number(booking.totalAmount).toLocaleString()}
                       </td>
-                      <td className="p-8">{getStatusBadge(booking.status)}</td>
+                      <td className="p-8">{getStatusBadge(booking)}</td>
                       <td className="p-8 text-right">
                         <button
                           onClick={() => {
@@ -442,7 +471,7 @@ const AdminBookings = () => {
                         {item.label}
                       </span>
                       {item.badge ? (
-                        getStatusBadge(item.value)
+                        getStatusBadge(selectedBooking)
                       ) : (
                         <span className="text-white font-medium">
                           {item.value}

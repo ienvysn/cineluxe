@@ -69,6 +69,7 @@ const PaymentPage = () => {
         navigate("/booking/success", {
           state: {
             bookingId: response.id,
+            bookingNumber: response.bookingNumber,
             pin: response.pin,
             movie,
             showtime,

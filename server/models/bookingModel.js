@@ -13,6 +13,11 @@ const Booking = sequelize.define(
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
+    bookingNumber: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      unique: true,
+    },
     showtimeId: {
       type: DataTypes.UUID,
       allowNull: false,
@@ -46,6 +51,11 @@ const Booking = sequelize.define(
     status: {
       type: DataTypes.ENUM("pending", "confirmed", "cancelled", "completed"),
       defaultValue: "confirmed",
+    },
+    isUsed: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+      allowNull: false,
     },
     pin: {
       type: DataTypes.STRING,

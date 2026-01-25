@@ -5,59 +5,19 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { toast } from 'sonner';
-import { movies, screens, showtimes } from '../../data/mockData';
 import { cn } from '../../lib/utils';
 import { Badge } from '../../components/ui/badge';
-
-
-const mockBookings = [
-  {
-    id: 'BK12345',
-    movieId: '1',
-    showtimeId: '1-screen-1-2024-12-03-14:00',
-    seats: ['E5', 'E6', 'E7'],
-    totalAmount: 900,
-    status: 'confirmed',
-    pin: '7834',
-    createdAt: new Date().toISOString(),
-    userId: 'user1',
-    checkedIn: false,
-  },
-  {
-    id: 'BK12346',
-    movieId: '2',
-    showtimeId: '2-screen-2-2024-12-03-17:00',
-    seats: ['D8', 'D9'],
-    totalAmount: 600,
-    status: 'confirmed',
-    pin: '2156',
-    createdAt: new Date(Date.now() - 86400000).toISOString(),
-    userId: 'user2',
-    checkedIn: true,
-  },
-  {
-    id: 'BK12347',
-    movieId: '3',
-    showtimeId: '3-screen-1-2024-12-02-20:00',
-    seats: ['F10'],
-    totalAmount: 300,
-    status: 'cancelled',
-    pin: '9421',
-    createdAt: new Date(Date.now() - 172800000).toISOString(),
-    userId: 'user3',
-    checkedIn: false,
-  },
-];
+import { apiCall } from '../../../api';
 
 const AdminValidate = () => {
   const [bookingId, setBookingId] = useState('');
   const [pin, setPin] = useState('');
-  const [validationResult, setValidationResult] = useState('idle');
+  const [validationResult, setValidationResult] = useState('idle'); // idle, valid, invalid, already-used, cancelled
   const [foundBooking, setFoundBooking] = useState(null);
-  const [bookings, setBookings] = useState(mockBookings);
   const [isValidating, setIsValidating] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
-  const handleValidate = () => {
+  const handleValidate = async () => {
     if (!bookingId.trim() || !pin.trim()) {
       toast.error('Details Missing', {
         description: 'Please enter both Booking ID and PIN.',
@@ -66,58 +26,49 @@ const AdminValidate = () => {
     }
 
     setIsValidating(true);
+    setValidationResult('idle');
+    setFoundBooking(null);
+    setErrorMessage('');
 
+    try {
+      const response = await apiCall("POST", "/bookings/validate", {
+        data: {
+          bookingId: bookingId.trim(),
+          pin: pin.trim(),
+        },
+      });
 
-    setTimeout(() => {
-      const booking = bookings.find(
-        (b) => b.id.toLowerCase() === bookingId.toLowerCase() && b.pin === pin
-      );
+      console.log("Validation Response:", response);
+      // If successful, response contains { message, booking }
 
-      if (!booking) {
-        setValidationResult('invalid');
-        setFoundBooking(null);
-        toast.error('No Match Found', {
-          description: 'We couldn\'t find a booking with those details.',
-        });
-      } else if (booking.status === 'cancelled') {
-        setValidationResult('cancelled');
-        setFoundBooking(booking);
-        toast.warning('Cancelled Booking', {
-          description: 'This booking was cancelled and cannot be used.',
-        });
-      } else if (booking.checkedIn) {
-        setValidationResult('checked-in');
-        setFoundBooking(booking);
-        toast.info('Already Checked In', {
-          description: 'This ticket has already been used for entry.',
-        });
-      } else {
-        setValidationResult('valid');
-        setFoundBooking(booking);
-        toast.success('Valid Ticket', {
-          description: 'Ticket is valid. You can now check them in.',
-        });
+      setFoundBooking(response.booking);
+      setValidationResult('valid');
+      toast.success('Ticket Validated', {
+        description: 'Ticket has been successfully verified and marked as used.',
+      });
+
+    } catch (error) {
+      console.error("Validation Error:", error);
+      let resultStatus = 'invalid';
+      let msg = error.message;
+
+      if (msg.includes('already been used')) {
+        resultStatus = 'already-used';
+      } else if (msg.includes('cancelled')) {
+        resultStatus = 'cancelled';
+      } else if (msg.includes('expired')) {
+        resultStatus = 'expired';
       }
 
+      setValidationResult(resultStatus);
+      setErrorMessage(msg);
+
+      toast.error('Validation Failed', {
+        description: msg,
+      });
+    } finally {
       setIsValidating(false);
-    }, 1000);
-  };
-
-  const handleCheckIn = () => {
-    if (!foundBooking) return;
-
-    setBookings((prev) =>
-      prev.map((b) =>
-        b.id === foundBooking.id ? { ...b, checkedIn: true } : b
-      )
-    );
-
-    setFoundBooking({ ...foundBooking, checkedIn: true });
-    setValidationResult('checked-in');
-
-    toast.success('Check-in Successful', {
-      description: `Booking ${foundBooking.id} is now checked in.`,
-    });
+    }
   };
 
   const handleReset = () => {
@@ -125,6 +76,7 @@ const AdminValidate = () => {
     setPin('');
     setValidationResult('idle');
     setFoundBooking(null);
+    setErrorMessage('');
   };
 
   const getResultDisplay = () => {
@@ -136,7 +88,7 @@ const AdminValidate = () => {
           bgColor: 'bg-emerald-500/5',
           borderColor: 'border-emerald-500/20',
           title: 'Valid Ticket',
-          message: 'This ticket is valid and ready for entry.',
+          message: 'Ticket is valid and has now been marked as used.',
         };
       case 'invalid':
         return {
@@ -145,9 +97,9 @@ const AdminValidate = () => {
           bgColor: 'bg-rose-500/5',
           borderColor: 'border-rose-500/20',
           title: 'Invalid Ticket',
-          message: 'No booking found with these details.',
+          message: errorMessage || 'No booking found with these details.',
         };
-      case 'checked-in':
+      case 'already-used':
         return {
           icon: AlertTriangle,
           iconColor: 'text-amber-500',
@@ -163,8 +115,18 @@ const AdminValidate = () => {
           bgColor: 'bg-rose-500/5',
           borderColor: 'border-rose-500/20',
           title: 'Cancelled',
-          message: 'This booking was previously cancelled.',
+          message: 'This booking was cancelled and cannot be used.',
         };
+      case 'expired':
+        return {
+          icon: XCircle,
+          iconColor: 'text-orange-500',
+          bgColor: 'bg-orange-500/5',
+          borderColor: 'border-orange-500/20',
+          title: 'Expired',
+          message: errorMessage || 'This ticket has expired.',
+        };
+
       default:
         return null;
     }
@@ -195,19 +157,19 @@ const AdminValidate = () => {
 
            <div className="grid grid-cols-1 md:grid-cols-5 gap-8 mb-8 relative z-10">
               <div className="md:col-span-3 space-y-3">
-                 <Label className="text-[10px] uppercase tracking-widest font-black text-muted-foreground ml-1">Booking ID</Label>
+                 <Label className="text-[10px] uppercase tracking-widest font-black text-muted-foreground ml-1">Booking Number</Label>
                  <Input
-                    placeholder="e.g. BK12345"
+                    placeholder="e.g. A7B2X9"
                     value={bookingId}
-                    onChange={(e) => setBookingId(e.target.value.toUpperCase())}
+                    onChange={(e) => setBookingId(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleValidate()}
-                    className="h-16 bg-white/5 border-white/5 rounded-2xl text-2xl font-mono font-bold px-6 focus:border-primary/40 transition-all shadow-xl"
+                    className="h-16 bg-white/5 border-white/5 rounded-2xl text-2xl font-mono font-bold px-6 focus:border-primary/40 transition-all shadow-xl uppercase"
                  />
               </div>
               <div className="md:col-span-2 space-y-3">
                  <Label className="text-[10px] uppercase tracking-widest font-black text-muted-foreground ml-1">PIN</Label>
                  <Input
-                    placeholder="7834"
+                    placeholder="1234"
                     value={pin}
                     onChange={(e) => setPin(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleValidate()}
@@ -267,15 +229,22 @@ const AdminValidate = () => {
             {foundBooking && (
               <div className="space-y-6 relative z-10">
                 {(() => {
-                  const movie = movies.find((m) => m.id === foundBooking.movieId);
-                  const showtime = showtimes.find((s) => s.id === foundBooking.showtimeId);
-                  const screen = showtime ? screens.find((s) => s.id === showtime.screenId) : null;
+                  const movie = foundBooking.showtime.movie;
+                  const showtime = foundBooking.showtime;
+                  const screen = foundBooking.showtime.screen;
+
+                  // Helper for Poster URL if needed (api returns poster path)
+                   const getPosterUrl = (posterPath) => {
+                      if (!posterPath) return "";
+                      if (posterPath.startsWith("http")) return posterPath;
+                      return `http://localhost:5000${posterPath}`;
+                    }
 
                   return (
                     <>
                       <div className="flex flex-col md:flex-row gap-8 p-8 bg-black/40 rounded-[32px] border border-white/5 shadow-inner">
                         <img
-                          src={movie?.poster}
+                          src={getPosterUrl(movie?.poster)}
                           alt={movie?.title}
                           className="w-28 h-40 object-cover rounded-2xl shadow-2xl border border-white/10"
                         />
@@ -294,8 +263,8 @@ const AdminValidate = () => {
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                          <div className="p-6 rounded-[24px] bg-black/20 border border-white/5 flex flex-col gap-2">
-                            <span className="text-[9px] uppercase tracking-widest text-muted-foreground font-black">Booking ID</span>
-                            <span className="text-xl font-mono font-bold text-white italic">{foundBooking.id}</span>
+                            <span className="text-[9px] uppercase tracking-widest text-muted-foreground font-black">Booking Number</span>
+                            <span className="text-xl font-mono font-bold text-white italic">{foundBooking.bookingNumber || foundBooking.id}</span>
                          </div>
                          <div className="p-6 rounded-[24px] bg-black/20 border border-white/5 flex flex-col gap-2">
                              <span className="text-[9px] uppercase tracking-widest text-muted-foreground font-bold">Seats</span>
@@ -311,24 +280,6 @@ const AdminValidate = () => {
                             </div>
                          </div>
                       </div>
-
-
-                      {validationResult === 'valid' && !foundBooking.checkedIn && (
-                        <div className="pt-4">
-                           <Button
-                              variant="gold"
-                              size="xl"
-                              onClick={handleCheckIn}
-                              className="w-full h-20 rounded-[28px] shadow-2xl animate-glow-pulse"
-                           >
-                              <CheckCircle className="w-8 h-8 mr-4" />
-                              <span className="flex flex-col items-start leading-none">
-                                 <span className="text-[10px] uppercase font-bold tracking-[4px] mb-1">Check In</span>
-                                 <span className="text-xl font-bold tracking-tight italic">Confirm Arrival</span>
-                              </span>
-                           </Button>
-                        </div>
-                      )}
                     </>
                   );
                 })()}

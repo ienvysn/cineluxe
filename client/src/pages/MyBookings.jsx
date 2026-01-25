@@ -23,6 +23,7 @@ import { bookingService } from "../services/bookingService";
 import { toast } from "sonner";
 
 const MyBookings = () => {
+  // Booking Status Logic: Booked (Yellow), Watched (Green), No-show (Red)
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -44,7 +45,8 @@ const MyBookings = () => {
 
   const upcomingBookings = bookings.filter((b) => {
     const showtimeDate = new Date(`${b.showtime.date}T${b.showtime.time}`);
-    return showtimeDate >= new Date() && b.status === "confirmed";
+    // Show confirmed OR completed bookings in the future
+    return showtimeDate >= new Date() && (b.status === "confirmed" || b.status === "completed");
   });
 
   const pastBookings = bookings.filter((b) => {
@@ -70,6 +72,19 @@ const MyBookings = () => {
     const hoursUntilShow =
       (showDate.getTime() - now.getTime()) / (1000 * 60 * 60);
     return hoursUntilShow > 2;
+  };
+
+  const getBookingStatus = (booking) => {
+    if (booking.status === 'completed' || booking.isUsed) return 'Watched';
+    if (booking.status === 'cancelled') return 'Cancelled';
+
+    const showtimeDate = new Date(`${booking.showtime.date}T${booking.showtime.time}`);
+    const now = new Date();
+    // 3 hours buffer for movie duration
+    const movieEnd = new Date(showtimeDate.getTime() + 3 * 60 * 60 * 1000);
+
+    if (now > movieEnd) return 'No-show';
+    return 'Booked';
   };
 
   const BookingCard = ({ booking }) => {
@@ -98,6 +113,18 @@ const MyBookings = () => {
                 <h3 className="font-display text-2xl font-bold text-foreground truncate group-hover:text-primary transition-colors">
                   {movie.title}
                 </h3>
+                <Badge
+                  variant="outline"
+                  className={cn(
+                    "ml-2 uppercase tracking-widest text-[10px] font-bold border-white/10",
+                    getBookingStatus(booking) === 'Watched' && "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+                    getBookingStatus(booking) === 'Booked' && "bg-amber-500/10 text-amber-500 border-amber-500/20",
+                    getBookingStatus(booking) === 'No-show' && "bg-destructive/10 text-destructive border-destructive/20",
+                    getBookingStatus(booking) === 'Cancelled' && "bg-white/5 text-muted-foreground"
+                  )}
+                >
+                  {getBookingStatus(booking)}
+                </Badge>
               </div>
 
               <div className="grid grid-cols-2 gap-4 mt-4">
