@@ -1,35 +1,57 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Save, Info, Wallet, Percent, Calendar as CalendarIcon, Tag, Coins } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { toast } from 'sonner';
-import { pricing as initialPricing } from '../../data/mockData';
+import { pricingService } from '../../services/pricingService';
 import { cn } from '../../lib/utils';
 import { Badge } from '../../components/ui/badge';
 
 const AdminPricing = () => {
   const [pricingData, setPricingData] = useState({
-    frontRow: initialPricing.frontRow,
-    normal: initialPricing.normal,
-    discountPercent: initialPricing.discountPercent,
+    frontRow: 0,
+    normal: 0,
+    discountPercent: 0,
   });
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleSave = () => {
+  useEffect(() => {
+    const fetchPricing = async () => {
+      try {
+        const data = await pricingService.getPricing();
+        setPricingData(data);
+      } catch (error) {
+        toast.error('Failed to load pricing');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchPricing();
+  }, []);
+
+  const handleSave = async () => {
     setIsSaving(true);
-
-    setTimeout(() => {
+    try {
+      await pricingService.updatePricing(pricingData);
       toast.success('Prices Updated', {
         description: 'Your ticket prices and discounts have been saved successfully.',
       });
+    } catch (error) {
+       toast.error('Failed to save prices');
+    } finally {
       setIsSaving(false);
-    }, 800);
+    }
   };
 
   const calculateDiscountedPrice = (price) => {
     return Math.round(price * (1 - pricingData.discountPercent / 100));
   };
+
+  if (isLoading) {
+    return <div className="text-white">Loading pricing...</div>;
+  }
 
   return (
     <div className="space-y-12 animate-fade-in max-w-4xl mx-auto">

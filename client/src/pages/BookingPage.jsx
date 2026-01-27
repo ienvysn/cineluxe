@@ -16,6 +16,7 @@ import {
 import { format } from "date-fns";
 import { Button } from "../components/ui/button";
 import { showtimeService } from "../services/showtimeService";
+import { pricingService } from "../services/pricingService";
 import { cn } from "../lib/utils";
 import { toast } from "sonner";
 
@@ -25,19 +26,26 @@ const BookingPage = () => {
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showtime, setShowtime] = useState(null);
+  const [pricing, setPricing] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchShowtimeDetails = async () => {
+    const fetchData = async () => {
       try {
         setIsLoading(true);
-        const data = await showtimeService.getById(id);
-        setShowtime(data);
+        const [showtimeData, pricingData] = await Promise.all([
+          showtimeService.getById(id),
+          pricingService.getPricing()
+        ]);
+
+        setShowtime(showtimeData);
+        setPricing(pricingData);
+
       } catch (err) {
-        console.error("Failed to fetch showtime:", err);
-        setError("Failed to load showtime details.");
+        console.error("Failed to fetch data:", err);
+        setError("Failed to load booking details.");
         toast.error("Error", {
-          description: "Could not load showtime details.",
+          description: "Could not load booking details.",
         });
       } finally {
         setIsLoading(false);
@@ -45,7 +53,7 @@ const BookingPage = () => {
     };
 
     if (id) {
-      fetchShowtimeDetails();
+      fetchData();
     }
   }, [id]);
 
@@ -57,7 +65,7 @@ const BookingPage = () => {
     );
   }
 
-  if (error || !showtime) {
+  if (error || !showtime || !pricing) {
     return (
       <div className="min-h-screen bg-[#030303] flex flex-col items-center justify-center p-4">
         <h2 className="text-2xl font-display font-bold text-white mb-4">
@@ -74,9 +82,20 @@ const BookingPage = () => {
   const rows = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").slice(0, screen.rows);
   const seats = Array.from({ length: screen.seatsPerRow }, (_, i) => i + 1);
 
-  // Using the price from the showtime object for now
+  // Dynamic pricing logic
   const getSeatPrice = (row) => {
-    return Number(showtime.price);
+    const isFrontRow = ['A', 'B', 'C'].includes(row);
+    let price = isFrontRow ? pricing.frontRow : pricing.normal;
+
+    // Check for discount days
+    const showtimeDate = new Date(showtime.date);
+    const dayOfWeek = showtimeDate.getDay(); // 0-6, 0 is Sunday
+
+    if (pricing.discountDays.includes(dayOfWeek)) {
+      price = price * (1 - pricing.discountPercent / 100);
+    }
+
+    return Math.round(price);
   };
 
   const toggleSeat = (seatId) => {

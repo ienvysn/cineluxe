@@ -36,7 +36,11 @@ const AuthPage = () => {
           description: "You have successfully logged in",
         });
 
-        navigate("/");
+        if (response.user.role === 'admin') {
+          navigate("/admin");
+        } else {
+          navigate("/");
+        }
       } else {
         // Handle Signup
         console.log("Signup started");

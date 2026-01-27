@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { DateFilter } from "../components/movies/DateFilter";
 import { MovieCard } from "../components/movies/MovieCard";
 import { ComingSoonCard } from "../components/movies/ComingSoonCard";
-import { comingSoonMovies } from "../data/mockData";
+
 import { movieService } from "../services/movieService";
 import { Sparkles, Calendar, ChevronRight } from "lucide-react";
 import {
@@ -22,10 +22,12 @@ const Index = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [movieList, setMovieList] = useState([]);
   const [showtimes, setShowtimes] = useState([]);
+  const [comingSoonMovies, setComingSoonMovies] = useState([]);
 
   useEffect(() => {
     setIsLoaded(true);
     fetchMovies();
+    fetchComingSoonMovies();
   }, []);
 
   useEffect(() => {
@@ -40,6 +42,17 @@ const Index = () => {
       }
     } catch (error) {
       console.error("Failed to fetch movies:", error);
+    }
+  };
+
+  const fetchComingSoonMovies = async () => {
+    try {
+      const data = await movieService.getUpcomingMovies();
+      if (data && data.length > 0) {
+        setComingSoonMovies(data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch coming soon movies:", error);
     }
   };
 
@@ -159,28 +172,38 @@ const Index = () => {
           </div>
 
           <div className="relative px-2">
-            <Carousel
-              opts={{
-                align: "start",
-                loop: true,
-              }}
-              className="w-full"
-            >
-              <CarouselContent className="-ml-6">
-                {comingSoonMovies.map((movie) => (
-                  <CarouselItem
-                    key={movie.id}
-                    className="pl-6 basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4"
-                  >
-                    <ComingSoonCard movie={movie} />
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-              <div className="hidden xl:block">
-                <CarouselPrevious className="-left-16" />
-                <CarouselNext className="-right-16" />
+            {comingSoonMovies.length > 0 ? (
+              <Carousel
+                opts={{
+                  align: "start",
+                  loop: true,
+                }}
+                className="w-full"
+              >
+                <CarouselContent className="-ml-6">
+                  {comingSoonMovies.map((movie) => (
+                    <CarouselItem
+                      key={movie.id}
+                      className="pl-6 basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4"
+                    >
+                      <ComingSoonCard movie={movie} />
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <div className="hidden xl:block">
+                  <CarouselPrevious className="-left-16" />
+                  <CarouselNext className="-right-16" />
+                </div>
+              </Carousel>
+            ) : (
+              <div className="text-center py-20 bg-white/[0.02] rounded-[40px] border border-dashed border-white/10">
+                <Sparkles className="w-12 h-12 text-primary/20 mx-auto mb-4" />
+                <p className="text-muted-foreground italic font-light">
+                  Our curators are selecting the next masterpieces. <br />
+                  Stay tuned for upcoming releases.
+                </p>
               </div>
-            </Carousel>
+            )}
           </div>
         </section>
       </div>

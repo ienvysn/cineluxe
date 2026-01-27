@@ -109,7 +109,7 @@ const deleteMovie = async (req, res) => {
   }
 };
 
-const getUpcomingMovies = async (req, res) => {
+  const getUpcomingMovies = async (req, res) => {
   try {
     const today = new Date();
     const nextMonth = new Date(today);
@@ -118,10 +118,11 @@ const getUpcomingMovies = async (req, res) => {
     const movies = await Movie.findAll({
       where: {
         releaseDate: {
-          [Op.gt]: nextMonth,
+          [Op.gt]: today,
+          [Op.lte]: nextMonth, // Strict 1 month window
         },
       },
-      order: [["releaseDate", "ASC"]],
+      order: [["releaseDate", "ASC"]], // Sorted by nearest release date
     });
     res.status(200).json(movies);
   } catch (error) {

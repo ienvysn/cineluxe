@@ -13,7 +13,7 @@ import { movieService } from "../../services/movieService";
 import { dashboardService } from "../../services/dashboardService";
 import { useState, useEffect } from "react";
 import { Badge } from "../../components/ui/badge";
-import { cn } from "../../lib/utils";
+import { cn, getPosterUrl } from "../../lib/utils";
 
 const StatCard = ({ title, value, icon: Icon, trend, positive = true }) => (
   <div className="glass-card p-6 border-white/5 relative overflow-hidden group hover:border-primary/30 transition-all duration-500">
@@ -181,7 +181,7 @@ const AdminDashboard = () => {
                       <div className="flex items-center gap-5">
                         <div className="relative flex-shrink-0">
                           <img
-                            src={movie?.poster}
+                            src={getPosterUrl(movie?.poster)}
                             alt={movie?.title}
                             className="w-12 h-16 object-cover rounded-lg shadow-xl"
                           />

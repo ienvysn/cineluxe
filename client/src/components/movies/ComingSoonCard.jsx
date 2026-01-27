@@ -2,7 +2,7 @@ import React from 'react';
 import { Badge } from '../ui/badge';
 import { Calendar } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
-import { cn } from '../../lib/utils';
+import { cn, getPosterUrl } from '../../lib/utils';
 
 export const ComingSoonCard = ({ movie }) => {
   const releaseDate = parseISO(movie.releaseDate);
@@ -13,7 +13,7 @@ export const ComingSoonCard = ({ movie }) => {
 
       <div className="aspect-[2/3] relative overflow-hidden">
         <img
-          src={movie.poster}
+          src={getPosterUrl(movie.poster)}
           alt={movie.title}
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 grayscale-[40%] group-hover:grayscale-0"
         />

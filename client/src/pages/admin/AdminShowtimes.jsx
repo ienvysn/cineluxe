@@ -20,7 +20,7 @@ import {
 import { Checkbox } from '../../components/ui/checkbox';
 import { toast } from 'sonner';
 import { Badge } from '../../components/ui/badge';
-import { cn } from '../../lib/utils';
+import { cn, getPosterUrl } from '../../lib/utils';
 import { showtimeService } from "../../services/showtimeService";
 import { movieService } from "../../services/movieService";
 import { screenService } from "../../services/screenService";
@@ -238,7 +238,7 @@ const AdminShowtimes = () => {
           return (
             <div key={showtime.id} className="glass-card p-6 group hover:border-primary/20 transition-all flex flex-col gap-5">
                <div className="flex gap-4">
-                  <img src={movie?.poster} alt="" className="w-16 h-24 object-cover rounded-xl border border-white/10" />
+                  <img src={getPosterUrl(movie?.poster)} alt="" className="w-16 h-24 object-cover rounded-xl border border-white/10" />
                   <div className="flex-1 overflow-hidden">
                      <h3 className="font-display text-lg font-bold text-white truncate group-hover:text-primary transition-colors leading-tight mb-2">{movie?.title || 'Unknown Movie'}</h3>
                      <div className="space-y-1.5">

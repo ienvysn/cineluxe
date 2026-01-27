@@ -257,11 +257,20 @@ const getShowtimesByMovie = async (req, res) => {
 const getShowtimesByDate = async (req, res) => {
   try {
     const { date } = req.params;
+    const today = new Date(); // Strict visibility check based on TODAY
 
     const showtimes = await Showtime.findAll({
       where: { date },
       include: [
-        { model: Movie, as: "movie" },
+        {
+          model: Movie,
+          as: "movie",
+          where: {
+            releaseDate: {
+              [Op.lte]: today, // Only show if movie is already released (or releasing today)
+            },
+          },
+        },
         { model: Screen, as: "screen" },
       ],
       order: [["time", "ASC"]],

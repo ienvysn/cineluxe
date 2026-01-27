@@ -27,7 +27,12 @@ export const apiCall = async (method, endpoint, options = {}) => {
   } catch (error) {
     console.error("API Error:", error.message);
 
-    if (error.response && error.response.data && error.response.data.error) {
+    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+      localStorage.removeItem("cineluxe_token");
+      localStorage.removeItem("cineluxe_user");
+      window.location.href = "/auth";
+      throw new Error("Session expired. Please login again.");
+    } else if (error.response && error.response.data && error.response.data.error) {
       throw new Error(error.response.data.error);
     } else if (error.response) {
       throw new Error(error.response.statusText || "Something went wrong");

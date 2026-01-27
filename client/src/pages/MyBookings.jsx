@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Badge } from "../components/ui/badge";
-import { cn } from "../lib/utils";
+import { cn, getPosterUrl } from "../lib/utils";
 import { useEffect } from "react";
 
 import { bookingService } from "../services/bookingService";
@@ -100,7 +100,7 @@ const MyBookings = () => {
         <div className="flex flex-col sm:flex-row gap-6 p-6">
           <div className="w-full sm:w-32 flex-shrink-0 relative">
             <img
-              src={movie.poster}
+              src={getPosterUrl(movie.poster)}
               alt={movie.title}
               className="w-full aspect-[2/3] object-cover rounded-2xl shadow-xl"
             />
@@ -171,7 +171,7 @@ const MyBookings = () => {
                   Booking ID
                 </span>
                 <span className="font-mono text-sm text-foreground">
-                  {booking.id}
+                  {booking.bookingNumber}
                 </span>
               </div>
               <div className="flex flex-col">

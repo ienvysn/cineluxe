@@ -7,6 +7,8 @@ const screenRoute = require("./routes/screenRoutes");
 const showtimeRoute = require("./routes/showtimeRoutes");
 const { createUploadFolder } = require("./utils/imageHelper");
 const bookingRoute = require("./routes/bookingRoutes");
+const pricingRoute = require("./routes/pricingRoutes")
+const dashboardRoute = require("./routes/dashboardRoutes");
 const cors = require("cors");
 require("dotenv").config();
 
@@ -28,7 +30,8 @@ app.use("/api/movies", movieRoute);
 app.use("/api/screens", screenRoute);
 app.use("/api/showtimes", showtimeRoute);
 app.use("/api/bookings", bookingRoute);
-app.use("/api/dashboard", require("./routes/dashboardRoutes"));
+app.use("/api/dashboard", dashboardRoute);
+app.use("/api/pricing", pricingRoute);
 
 app.listen(port, () => {
   console.log(`Server Running at port : ${port}`);

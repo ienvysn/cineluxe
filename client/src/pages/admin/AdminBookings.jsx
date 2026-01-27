@@ -50,7 +50,7 @@ const AdminBookings = () => {
   const [stats, setStats] = useState({
     totalRevenue: 0,
     confirmedCount: 0,
-    cancelledCount: 0,
+
     totalBookings: 0
   });
 
@@ -81,7 +81,7 @@ const AdminBookings = () => {
     }
   };
 
-  // Extract unique movies for filter
+
   const uniqueMovies = Array.from(
     new Map(
       bookings
@@ -92,7 +92,7 @@ const AdminBookings = () => {
 
   const getBookingStatus = (booking) => {
     if (booking.status === 'completed' || booking.isUsed) return 'Watched';
-    if (booking.status === 'cancelled') return 'Cancelled';
+
 
     if (!booking.showtime || !booking.showtime.date || !booking.showtime.time) return 'Booked';
 
@@ -135,15 +135,7 @@ const AdminBookings = () => {
             Booked
           </Badge>
         );
-      case "Cancelled":
-        return (
-          <Badge
-            variant="outline"
-            className="bg-white/5 text-muted-foreground border-white/10 font-bold uppercase text-[9px] tracking-widest px-3 py-1"
-          >
-            Cancelled
-          </Badge>
-        );
+
       case "Watched":
         return (
           <Badge
@@ -177,7 +169,7 @@ const AdminBookings = () => {
 
   return (
     <div className="space-y-12 animate-fade-in">
-      {/* (Title section remains the same) */}
+
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
@@ -193,12 +185,7 @@ const AdminBookings = () => {
             icon: CheckCircle2,
             color: "text-emerald-500",
           },
-          {
-            label: "Cancelled",
-            value: stats.cancelledCount,
-            icon: XCircle,
-            color: "text-rose-500",
-          },
+
           {
             label: "Total Revenue",
             value: `NPR ${Number(stats.totalRevenue).toLocaleString()}`,
@@ -249,7 +236,7 @@ const AdminBookings = () => {
               <SelectItem value="Booked">Booked</SelectItem>
               <SelectItem value="Watched">Watched</SelectItem>
               <SelectItem value="No-show">No-show</SelectItem>
-              <SelectItem value="Cancelled">Cancelled</SelectItem>
+
             </SelectContent>
           </Select>
 

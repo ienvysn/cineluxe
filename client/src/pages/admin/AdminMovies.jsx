@@ -386,19 +386,37 @@ const AdminMovies = () => {
                   </Select>
                 </div>
 
-                <div className="space-y-2">
-                  <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">
-                    Story Summary
-                  </Label>
-                  <Textarea
-                    value={formData.synopsis}
-                    onChange={(e) =>
-                      setFormData({ ...formData, synopsis: e.target.value })
-                    }
-                    rows={4}
-                    className="rounded-2xl bg-white/5 border-white/5"
-                  />
-                </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                       <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Genre (Comma separated)</Label>
+                       <Input value={formData.genre} onChange={(e) => setFormData({...formData, genre: e.target.value})} className="h-11 bg-white/5 border-white/5 rounded-xl" placeholder="Action, Drama" />
+                    </div>
+                    <div className="space-y-2">
+                       <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Language</Label>
+                       <Input value={formData.language} onChange={(e) => setFormData({...formData, language: e.target.value})} className="h-11 bg-white/5 border-white/5 rounded-xl" placeholder="English" />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4">
+                     <div className="space-y-2">
+                       <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Release Date</Label>
+                       <Input type="date" value={formData.releaseDate} onChange={(e) => setFormData({...formData, releaseDate: e.target.value})} className="h-11 bg-white/5 border-white/5 rounded-xl block" style={{colorScheme: "dark"}} />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">
+                      Story Summary
+                    </Label>
+                    <Textarea
+                      value={formData.synopsis}
+                      onChange={(e) =>
+                        setFormData({ ...formData, synopsis: e.target.value })
+                      }
+                      rows={4}
+                      className="rounded-2xl bg-white/5 border-white/5"
+                    />
+                  </div>
 
                 <div className="flex justify-end gap-3 pt-6 pb-8">
                   <Button

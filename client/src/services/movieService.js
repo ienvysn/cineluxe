@@ -61,4 +61,13 @@ export const movieService = {
       throw error;
     }
   },
+
+  getUpcomingMovies: async () => {
+    try {
+      return await apiCall("GET", "/movies/upcoming");
+    } catch (error) {
+      console.error("Error fetching upcoming movies:", error.message);
+      throw error;
+    }
+  },
 };

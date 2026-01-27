@@ -67,40 +67,7 @@ export const movies = [
   },
 ];
 
-export const comingSoonMovies = [
-  {
-    id: 'cs-1',
-    title: 'Deadpool & Wolverine',
-    poster: 'https://image.tmdb.org/t/p/w500/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg',
-    genre: ['Action', 'Comedy', 'Superhero'],
-    releaseDate: '2025-01-15',
-    synopsis: 'Deadpool and Wolverine team up for an epic multiverse adventure.',
-  },
-  {
-    id: 'cs-2',
-    title: 'Gladiator II',
-    poster: 'https://image.tmdb.org/t/p/w500/2cxhvwyEwRlysAmRH4iodkvo0z5.jpg',
-    genre: ['Action', 'Drama', 'History'],
-    releaseDate: '2025-02-20',
-    synopsis: 'The epic saga continues as a new hero rises in ancient Rome.',
-  },
-  {
-    id: 'cs-3',
-    title: 'Captain America: Brave New World',
-    poster: 'https://image.tmdb.org/t/p/w500/pzIddUEMWhWzfvLI3TwxUG2wGoi.jpg',
-    genre: ['Action', 'Adventure', 'Superhero'],
-    releaseDate: '2025-03-10',
-    synopsis: 'Sam Wilson takes on the mantle of Captain America in a new era.',
-  },
-  {
-    id: 'cs-4',
-    title: 'Mission: Impossible 8',
-    poster: 'https://image.tmdb.org/t/p/w500/NNxYkU70HPurnNCSiCjYAmacwm.jpg',
-    genre: ['Action', 'Thriller', 'Spy'],
-    releaseDate: '2025-04-25',
-    synopsis: 'Ethan Hunt faces his most dangerous mission yet.',
-  },
-];
+
 
 export const screens = [
   { id: 'screen-1', name: 'Screen 1', rows: 8, seatsPerRow: 12 },
