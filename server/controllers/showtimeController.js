@@ -23,6 +23,62 @@ const getDateRange = (startDate, endDate) => {
   return dates;
 };
 
+const checkOverlap = async (
+  screenId,
+  date,
+  time,
+  duration,
+  excludeShowtimeId = null,
+) => {
+
+  const newStart = new Date(`${date}T${time}`);
+  const newEnd = new Date(newStart.getTime() + duration * 60000);
+
+
+  const searchDate = new Date(date);
+  const prevDate = new Date(searchDate);
+  prevDate.setDate(prevDate.getDate() - 1);
+  const nextDate = new Date(searchDate);
+  nextDate.setDate(nextDate.getDate() + 1);
+
+  const datesToCheck = [
+    prevDate.toISOString().split("T")[0],
+    date,
+    nextDate.toISOString().split("T")[0],
+  ];
+
+  const whereClause = {
+    screenId,
+    date: {
+      [Op.in]: datesToCheck,
+    },
+  };
+
+  if (excludeShowtimeId) {
+    whereClause.id = { [Op.ne]: excludeShowtimeId };
+  }
+
+  const existingShowtimes = await Showtime.findAll({
+    where: whereClause,
+    include: [{ model: Movie, as: "movie" }],
+  });
+
+  for (const showtime of existingShowtimes) {
+    const existingStart = new Date(`${showtime.date}T${showtime.time}`);
+    const existingDuration = showtime.movie ? showtime.movie.duration : 120;
+    const existingEnd = new Date(
+      existingStart.getTime() + existingDuration * 60000,
+    );
+
+
+    if (newStart < existingEnd && newEnd > existingStart) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
 const createShowtime = async (req, res) => {
   try {
     const { movieId, screenId, date, time, price } = req.body;
@@ -33,19 +89,19 @@ const createShowtime = async (req, res) => {
       });
     }
 
-    // Check if movie exists
+      // Check if movie exists
     const movie = await Movie.findByPk(movieId);
     if (!movie) {
       return res.status(404).json({ error: "Movie not found" });
     }
 
-    // Check if screen exists
+
     const screen = await Screen.findByPk(screenId);
     if (!screen) {
       return res.status(404).json({ error: "Screen not found" });
     }
 
-    // Check for duplicate showtime
+      // Check for duplicate showtime
     const existingShowtime = await Showtime.findOne({
       where: { movieId, screenId, date, time },
     });
@@ -54,6 +110,20 @@ const createShowtime = async (req, res) => {
       return res.status(409).json({
         error:
           "A showtime already exists for this movie, screen, date, and time",
+      });
+    }
+
+    const isOverlapping = await checkOverlap(
+      screenId,
+      date,
+      time,
+      movie.duration,
+    );
+
+    if (isOverlapping) {
+      return res.status(409).json({
+        error:
+          "This showtime overlaps with another movie scheduled on this screen.",
       });
     }
 
@@ -126,15 +196,31 @@ const createRecurringShowtimes = async (req, res) => {
         });
 
         if (!existing) {
-          showtimesToCreate.push({
-            movieId,
+          // Check for overlap
+          const isOverlapping = await checkOverlap(
             screenId,
             date,
-            time: formattedTime,
-            price: price || 300.0,
-            bookedSeats: [],
-            heldSeats: [],
-          });
+            formattedTime,
+            movie.duration,
+          );
+
+          if (isOverlapping) {
+            errors.push({
+              date,
+              time: formattedTime,
+              message: "Showtime overlaps with another movie",
+            });
+          } else {
+            showtimesToCreate.push({
+              movieId,
+              screenId,
+              date,
+              time: formattedTime,
+              price: price || 300.0,
+              bookedSeats: [],
+              heldSeats: [],
+            });
+          }
         } else {
           errors.push({
             date,
@@ -314,6 +400,25 @@ const updateShowtime = async (req, res) => {
           error:
             "A showtime already exists for this movie, screen, date, and time",
         });
+      }
+
+      // Check for overlap
+      const movie = await Movie.findByPk(showtime.movieId);
+      if (movie) {
+        const isOverlapping = await checkOverlap(
+          showtime.screenId,
+          newDate,
+          newTime,
+          movie.duration,
+          id,
+        );
+
+        if (isOverlapping) {
+          return res.status(409).json({
+            error:
+              "This showtime overlaps with another movie scheduled on this screen.",
+          });
+        }
       }
     }
 
