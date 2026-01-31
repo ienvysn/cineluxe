@@ -2,6 +2,7 @@ const Showtime = require("../models/showtimeModel");
 const Movie = require("../models/movieModel");
 const Screen = require("../models/screenModel");
 const { Op } = require("sequelize");
+const redisClient = require("../utils/redisClient");
 
 const formatTime = (time) => {
   if (!time) return time;
@@ -144,6 +145,9 @@ const createShowtime = async (req, res) => {
       ],
     });
 
+
+    await redisClient.del(`showtimes:date:${date}`);
+
     res.status(201).json(showtimeWithDetails);
   } catch (error) {
     console.error("Error creating showtime:", error);
@@ -233,6 +237,11 @@ const createRecurringShowtimes = async (req, res) => {
 
     // Bulk create showtimes
     const createdShowtimes = await Showtime.bulkCreate(showtimesToCreate);
+
+    // Invalidate cache for all affected dates
+    for (const date of dates) {
+        await redisClient.del(`showtimes:date:${date}`);
+    }
 
     res.status(201).json({
       created: createdShowtimes.length,
@@ -343,7 +352,14 @@ const getShowtimesByMovie = async (req, res) => {
 const getShowtimesByDate = async (req, res) => {
   try {
     const { date } = req.params;
-    const today = new Date(); // Strict visibility check based on TODAY
+
+    const cacheKey = `showtimes:date:${date}`;
+    const cachedShowtimes = await redisClient.get(cacheKey);
+    if (cachedShowtimes) {
+       return res.status(200).json(JSON.parse(cachedShowtimes));
+    }
+
+    const today = new Date();
 
     const showtimes = await Showtime.findAll({
       where: { date },
@@ -353,13 +369,17 @@ const getShowtimesByDate = async (req, res) => {
           as: "movie",
           where: {
             releaseDate: {
-              [Op.lte]: today, // Only show if movie is already released (or releasing today)
+              [Op.lte]: today,
             },
           },
         },
         { model: Screen, as: "screen" },
       ],
       order: [["time", "ASC"]],
+    });
+
+    await redisClient.set(cacheKey, JSON.stringify(showtimes), {
+      EX: 3600 // 1 hour
     });
 
     res.status(200).json(showtimes);
@@ -436,6 +456,12 @@ const updateShowtime = async (req, res) => {
       ],
     });
 
+    // Invalidate cache for old date and new date (if changed)
+    await redisClient.del(`showtimes:date:${showtime.date}`);
+    if (date && date !== showtime.date) {
+        await redisClient.del(`showtimes:date:${date}`);
+    }
+
     res.status(200).json(updatedShowtime);
   } catch (error) {
     console.error("Error updating showtime:", error);
@@ -447,13 +473,15 @@ const deleteShowtime = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const deleted = await Showtime.destroy({
-      where: { id },
-    });
-
-    if (!deleted) {
+    const showtime = await Showtime.findByPk(id);
+    if (!showtime) {
       return res.status(404).json({ error: "Showtime not found" });
     }
+
+    await showtime.destroy();
+
+    // Invalidate cache
+    await redisClient.del(`showtimes:date:${showtime.date}`);
 
     res.status(204).send();
   } catch (error) {

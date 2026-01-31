@@ -1,5 +1,6 @@
 const Movie = require("../models/movieModel");
 const { Op } = require("sequelize");
+const redisClient = require("../utils/redisClient");
 
 const createMovie = async (req, res) => {
   try {
@@ -34,7 +35,11 @@ const createMovie = async (req, res) => {
       synopsis,
       releaseDate,
     });
-    console.log("This is worling");
+
+
+    await redisClient.del('movies:all');
+
+
     res.status(201).json(movie);
   } catch (error) {
     console.error("Error creating movie:", error);
@@ -44,7 +49,16 @@ const createMovie = async (req, res) => {
 
 const getAllMovies = async (req, res) => {
   try {
+    const cachedMovies = await redisClient.get('movies:all');
+    if (cachedMovies) {
+      return res.status(200).json(JSON.parse(cachedMovies));
+    }
+
     const movies = await Movie.findAll();
+    await redisClient.set('movies:all', JSON.stringify(movies), {
+      EX: 86400 // 24 hours
+    });
+
     res.status(200).json(movies);
   } catch (error) {
     console.error("Error fetching movies:", error);
@@ -86,6 +100,10 @@ const updateMovie = async (req, res) => {
       return res.status(404).json({ error: "Movie not found" });
     }
     const updatedMovie = await Movie.findByPk(id);
+
+    // Invalidate cache
+    await redisClient.del('movies:all');
+
     res.status(200).json(updatedMovie);
   } catch (error) {
     console.error("Error updating movie:", error);
@@ -102,6 +120,10 @@ const deleteMovie = async (req, res) => {
     if (!deleted) {
       return res.status(404).json({ error: "Movie not found" });
     }
+
+    // Invalidate cache
+    await redisClient.del('movies:all');
+
     res.status(204).send();
   } catch (error) {
     console.error("Error deleting movie:", error);
