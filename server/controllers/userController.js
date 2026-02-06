@@ -1,6 +1,56 @@
 const bcrypt = require("bcrypt");
 const { generateToken } = require("../utils/jwtUtils");
 const User = require("../models/userModel");
+const { OAuth2Client } = require('google-auth-library');
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+const googleLogin = async (req, res) => {
+  try {
+    const { token } = req.body;
+
+    const response = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${token}`);
+
+    if (!response.ok) {
+      return res.status(400).json({ error: "Invalid Google token" });
+    }
+
+    const { name, email, sub: googleId } = await response.json();
+
+    let user = await User.findOne({ where: { google_id: googleId } });
+
+    if (!user) {
+      user = await User.findOne({ where: { email } });
+      if (user) {
+        user.google_id = googleId;
+        await user.save();
+      } else {
+        user = await User.create({
+          fullname: name,
+          email,
+          google_id: googleId,
+          role: 'user',
+        });
+      }
+    }
+
+    const jwtToken = generateToken({ id: user.id, email: user.email, role: user.role });
+
+    res.status(200).json({
+      message: "Google login successful",
+      token: jwtToken,
+      user: {
+        id: user.id,
+        fullName: user.fullname,
+        email: user.email,
+        role: user.role
+      }
+    });
+  } catch (error) {
+    console.error("Google login error:", error);
+    res.status(500).json({ error: "Google login failed" });
+  }
+};
+
 
 const signup = async (req, res) => {
   try {
@@ -87,4 +137,4 @@ const getProfile = async (req, res) => {
   }
 };
 
-module.exports = { signup, login, getProfile };
+module.exports = { signup, login, getProfile, googleLogin };

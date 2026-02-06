@@ -3,8 +3,12 @@ import ReactDOM from 'react-dom/client'
 import AppRouter from './AppRouter'
 import './index.css'
 
+import { GoogleOAuthProvider } from '@react-oauth/google';
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <AppRouter />
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+      <AppRouter />
+    </GoogleOAuthProvider>
   </React.StrictMode>,
 )
