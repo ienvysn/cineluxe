@@ -8,13 +8,12 @@ const googleLogin = async (req, res) => {
   try {
     const { token } = req.body;
 
-    const response = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${token}`);
+    client.setCredentials({ access_token: token });
+    const response = await client.request({
+      url: "https://www.googleapis.com/oauth2/v3/userinfo",
+    });
 
-    if (!response.ok) {
-      return res.status(400).json({ error: "Invalid Google token" });
-    }
-
-    const { name, email, sub: googleId } = await response.json();
+    const { name, email, sub: googleId } = response.data;
 
     let user = await User.findOne({ where: { google_id: googleId } });
 
@@ -47,7 +46,11 @@ const googleLogin = async (req, res) => {
     });
   } catch (error) {
     console.error("Google login error:", error);
-    res.status(500).json({ error: "Google login failed" });
+    res.status(500).json({
+      error: "Google login failed",
+      details: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 };
 

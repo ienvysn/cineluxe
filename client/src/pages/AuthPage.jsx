@@ -72,62 +72,28 @@ const AuthPage = () => {
   const handleGoogleSignIn = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       try {
-        const response = await apiCall("POST", "/users/google-login", { token: tokenResponse.credential || tokenResponse.access_token });
-         // Note: if using 'implicit' flow (default for useGoogleLogin without flow: 'auth-code'), we get access_token.
-         // But verifyIdToken in backend expects an ID token.
-         // Actually, useGoogleLogin by default returns an access token.
-         // If we want an ID Token (credential), we might need to use the GoogleLogin component or flow: 'auth-code' and exchange it.
-         // However, standard useGoogleLogin provides an access token which can be used to get user info, OR we can use the 'id_token' flow if configured.
-         // Let's check the backend controller again. It uses client.verifyIdToken({ idToken: token }).
-         // This requires an ID Token.
-         // To get an ID token with useGoogleLogin, we usually need the GoogleLogin component (which renders the button).
-         // BUT, we can also use flow: 'implicit' but getting id_token back requires specific config?
-         // Actually, simpler approach for custom button:
-         // If we want to verify in backend, 'idToken' is best.
-         // Let's use the GoogleLogin component's approach logic? No, we have a custom button.
-         // We can use the access token to fetch user info in backend? OR verify the access token?
-         // google-auth-library verifyIdToken verifies an *ID Token*.
-         // To get an ID Token from useGoogleLogin, strict OpenID Connect might be needed.
-         // ALTERNATIVE: Backend can use the access token to call Google's userinfo endpoint.
-         // BUT, let's stick to the plan.
-         // Let's try to pass the access token to backend and let backend fetch user details?
-         // OR, easier: let's use the `onSuccess` response properly.
+        console.log("Google Login Response:", tokenResponse);
+        const res = await apiCall("POST", "/users/google-login", {
+          data: { token: tokenResponse.access_token }
+        });
 
-         // Let's just send the token we get.
-         // Wait, verifyIdToken expects a JWT (ID Token). useGoogleLogin (implicit) returns an access token (opaque string).
-         // I should change the backend to use the access token to fetch user profile, OR change frontend to get ID Token.
-         // Changing backend to use access token is safer for custom buttons often.
-         // Let's pause and think.
+        localStorage.setItem("cineluxe_token", res.token);
+        localStorage.setItem("cineluxe_user", JSON.stringify(res.user));
 
-         // Actually, I can use `flow: 'auth-code'` to get a code, and exchange it.
-         // OR I can use the `GoogleLogin` component which returns a credential (ID token).
-         // BUT the user has a custom design.
-         // The `useGoogleLogin` hook can return an access token.
-         // I will modify the BACKEND to accept an access token and fetch user info. It's more robust for custom flows anyway.
-         // Let's update the backend controller first?
-         // No, I'll update the frontend to send the access token, and then fix the backend to use it.
+        toast.success("Welcome back!", {
+          description: "You have successfully logged in with Google",
+        });
 
-         console.log("Google Login Response:", tokenResponse);
-         // Sending just the token.
-         const res = await apiCall("POST", "/users/google-login", { token: tokenResponse.access_token });
-
-         localStorage.setItem("cineluxe_token", res.token);
-         localStorage.setItem("cineluxe_user", JSON.stringify(res.user));
-
-         toast.success("Welcome back!", {
-           description: "You have successfully logged in with Google",
-         });
-
-         if (res.user.role === 'admin') {
-           navigate("/admin");
-         } else {
-           navigate("/");
-         }
+        if (res.user.role === 'admin') {
+          navigate("/admin");
+        } else {
+          navigate("/");
+        }
       } catch (error) {
-         console.error("Google Auth error:", error);
-         toast.error("Google Login Failed", {
-           description: error.message || "An error occurred",
-         });
+        console.error("Google Auth error:", error);
+        toast.error("Google Login Failed", {
+          description: error.message || "An error occurred",
+        });
       }
     },
     onError: () => {
