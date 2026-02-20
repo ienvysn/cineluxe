@@ -11,6 +11,12 @@ const Movie = sequelize.define(
     title: {
       type: DataTypes.STRING,
       allowNull: false,
+      validate: {
+        len: {
+          args: [0, 50],
+          msg: "Title must be between 0 and 50 characters",
+        },
+      },
     },
     poster: {
       type: DataTypes.STRING,

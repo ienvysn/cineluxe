@@ -12,6 +12,12 @@ const Screen = sequelize.define(
     name: {
       type: DataTypes.STRING,
       allowNull: false,
+      validate: {
+        len: {
+          args: [0, 20],
+          msg: "Screen name must be between 0 and 20 characters",
+        },
+      },
     },
     capacity: {
       type: DataTypes.INTEGER,

@@ -97,6 +97,7 @@ const AdminLogin = () => {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="pl-12 bg-white/5 border-white/5 h-12 rounded-xl focus:border-primary/30 transition-all"
+                  maxLength={50}
                   required
                 />
               </div>
@@ -113,6 +114,7 @@ const AdminLogin = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="pl-12 bg-white/5 border-white/5 h-12 rounded-xl focus:border-primary/30 transition-all"
+                  maxLength={32}
                   required
                 />
               </div>

@@ -76,6 +76,30 @@ const createBooking = async (req, res) => {
       ],
     });
 
+
+
+
+    const User = require("../models/userModel");
+    const user = await User.findByPk(userId);
+
+    if (user && user.email) {
+        const { sendBookingConfirmation } = require("../utils/emailService");
+        await sendBookingConfirmation(user.email, {
+            movie: showtime.Movie || (await showtime.getMovie()), // Ensure we have movie data
+            showtime: {
+                date: showtime.date,
+                time: showtime.time
+            },
+            screen: {
+                name: (await showtime.getScreen()).name
+            },
+            seats: seats,
+            totalAmount: totalAmount,
+            bookingId: bookingNumber // using the short booking number
+        });
+    }
+
+
     res.status(201).json(completeBooking);
   } catch (error) {
     await t.rollback();

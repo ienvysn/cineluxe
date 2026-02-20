@@ -83,7 +83,7 @@ const PaymentPage = () => {
           },
         });
         setIsProcessing(false);
-      }, 1500);
+      }, 800);
     } catch (error) {
       console.error("Booking failed:", error.message);
       toast.error("Booking Failed", {
@@ -183,6 +183,7 @@ const PaymentPage = () => {
                       <Input
                         placeholder="JOHN DOE"
                         className="h-14 bg-white/5 border-white/5 rounded-2xl"
+                        maxLength={25}
                         required
                       />
                     </div>
@@ -194,6 +195,7 @@ const PaymentPage = () => {
                         <Input
                           placeholder="•••• •••• •••• ••••"
                           className="h-14 bg-white/5 border-white/5 rounded-2xl pl-12"
+                          maxLength={19}
                           required
                         />
                         <CreditCard className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -207,6 +209,7 @@ const PaymentPage = () => {
                         <Input
                           placeholder="MM/YY"
                           className="h-14 bg-white/5 border-white/5 rounded-2xl"
+                          maxLength={5}
                           required
                         />
                       </div>
@@ -217,6 +220,7 @@ const PaymentPage = () => {
                         <Input
                           placeholder="•••"
                           className="h-14 bg-white/5 border-white/5 rounded-2xl"
+                          maxLength={4}
                           required
                         />
                       </div>

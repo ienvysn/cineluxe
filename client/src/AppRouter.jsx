@@ -51,7 +51,7 @@ const AdminRoute = ({ children }) => {
 const AppRouter = () => {
   return (
     <Router>
-      <Toaster position="top-right" expand={false} richColors />
+      <Toaster position="top-right" expand={false} richColors duration={2000} />
       <Routes>
         {/* Public Routes */}
         <Route
