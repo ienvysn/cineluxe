@@ -36,7 +36,7 @@ describe("Movie Controller - createMovie", () => {
     expect(Movie.create).toHaveBeenCalledWith(
       expect.objectContaining({
         title: "Inception",
-        genre: ["Action", "Sci-Fi"], // Verify split logic
+        genre: ["Action", "Sci-Fi"],
       }),
     );
     expect(res.status).toHaveBeenCalledWith(201);

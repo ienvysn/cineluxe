@@ -16,13 +16,18 @@ const MovieMock = dbMock.define("Movie", {
 });
 
 describe("MovieModal", () => {
-  it("should create a new movie", async () => {
-    await expect(MovieMock.create({ MovieMock   })).rejects.toThrow();
-    expect(MovieMock.create).toHaveBeenCalledWith({ Movie });
-    expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith({
-      message: "Movie created successfully",
-      movie: expect.any(Object),
-    });
+  it("should create a new movie mock instance", async () => {
+    const movieData = {
+      title: "Inception",
+      duration: 148,
+      genre: ["Action", "Sci-Fi"],
+      rating: "PG-13",
+    };
+
+    const movie = await MovieMock.create(movieData);
+
+    expect(movie.title).toBe("Inception");
+    expect(movie.duration).toBe(148);
+    expect(movie.genre).toContain("Action");
   });
 });
