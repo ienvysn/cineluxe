@@ -18,7 +18,7 @@ export const DateFilter = ({ selectedDate, onDateSelect }) => {
   }
 
   return (
-    <div className="flex justify-center items-center gap-3 py-8 px-4 overflow-x-auto scrollbar-hide">
+    <div className="flex justify-start md:justify-center items-center gap-3 py-8 px-4 overflow-x-auto scrollbar-hide w-full max-w-full">
       {dates.map((date) => (
         <button
           key={date.dateStr}

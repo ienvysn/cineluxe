@@ -72,7 +72,6 @@ const Showtime = sequelize.define(
   },
 );
 
-// Define associations
 Showtime.belongsTo(Movie, { foreignKey: "movieId", as: "movie" });
 Showtime.belongsTo(Screen, { foreignKey: "screenId", as: "screen" });
 

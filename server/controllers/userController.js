@@ -1,7 +1,7 @@
 const bcrypt = require("bcrypt");
 const { generateToken } = require("../utils/jwtUtils");
 const User = require("../models/userModel");
-const { OAuth2Client } = require('google-auth-library');
+const { OAuth2Client } = require("google-auth-library");
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const googleLogin = async (req, res) => {
@@ -27,12 +27,16 @@ const googleLogin = async (req, res) => {
           fullname: name,
           email,
           google_id: googleId,
-          role: 'user',
+          role: "user",
         });
       }
     }
 
-    const jwtToken = generateToken({ id: user.id, email: user.email, role: user.role });
+    const jwtToken = generateToken({
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    });
 
     res.status(200).json({
       message: "Google login successful",
@@ -41,19 +45,18 @@ const googleLogin = async (req, res) => {
         id: user.id,
         fullName: user.fullname,
         email: user.email,
-        role: user.role
-      }
+        role: user.role,
+      },
     });
   } catch (error) {
     console.error("Google login error:", error);
     res.status(500).json({
       error: "Google login failed",
       details: error.message,
-      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
     });
   }
 };
-
 
 const signup = async (req, res) => {
   try {
@@ -75,7 +78,11 @@ const signup = async (req, res) => {
       password_hash,
     });
 
-    const token = generateToken({ id: user.id, email: user.email, role: user.role });
+    const token = generateToken({
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    });
 
     res.status(201).json({
       message: "User created successfully",
@@ -84,8 +91,8 @@ const signup = async (req, res) => {
         id: user.id,
         fullName: user.fullname,
         email: user.email,
-        role: user.role
-      }
+        role: user.role,
+      },
     });
   } catch (error) {
     console.error("Signup error:", error);
@@ -111,7 +118,11 @@ const login = async (req, res) => {
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
-    const token = generateToken({ id: user.id, email: user.email, role: user.role });
+    const token = generateToken({
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    });
 
     res.status(200).json({
       message: "Login successful",
@@ -120,8 +131,8 @@ const login = async (req, res) => {
         id: user.id,
         fullName: user.fullname,
         email: user.email,
-        role: user.role
-      }
+        role: user.role,
+      },
     });
   } catch (error) {
     console.error("Login error:", error);

@@ -269,6 +269,7 @@ const AdminShowtimes = () => {
 
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent className="max-w-2xl rounded-[40px] border-white/5 bg-[#070707] p-0 overflow-hidden shadow-2xl">
+          <DialogTitle className="sr-only">Showtime Scheduling</DialogTitle>
           <div className="grid grid-cols-1 md:grid-cols-5 min-h-[500px]">
 
              <div className="md:col-span-2 bg-[#0A0A0A] p-10 border-r border-white/5 flex flex-col justify-center items-center text-center">

@@ -25,6 +25,8 @@ const Booking = sequelize.define(
         model: Showtime,
         key: "id",
       },
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
     },
     userId: {
       type: DataTypes.UUID,

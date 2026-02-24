@@ -8,5 +8,6 @@ export function cn(...inputs) {
 export function getPosterUrl(posterPath) {
   if (!posterPath) return "";
   if (posterPath.startsWith("http")) return posterPath;
-  return `http://localhost:5000${posterPath}`;
+  const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+  return `${API_BASE}${posterPath}`;
 }

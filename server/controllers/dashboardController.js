@@ -48,23 +48,18 @@ const getDashboardStats = async (req, res) => {
 
     // 4. Total Customers
     const totalCustomers = await User.count({
-        where: { role: 'user' }
-    }).catch(() => User.count()); // Fallback if role doesn't exist or error
+      where: { role: "user" },
+    }).catch(() => User.count());
 
     // 5. Total Movies & Screens
     const totalMovies = await Movie.count();
     const totalScreens = await Screen.count();
 
-    // 6. Today's Showtimes
-    // We need to format today as YYYY-MM-DD for string comparison if date is stored as string/dateonly
-    // Or if it's datetime, use range.
-    // Looking at previous code `const todayDate = new Date().toISOString().split("T")[0];` implies date is likely YYYY-MM-DD string or DATEONLY.
-    // Let's assume DATEONLY or string YYYY-MM-DD as per common practice in this codebase.
     const todayStr = today.toISOString().split("T")[0];
 
     const todayShowtimes = await Showtime.findAll({
       where: {
-        date: todayStr
+        date: todayStr,
       },
       include: [
         { model: Movie, as: "movie" },

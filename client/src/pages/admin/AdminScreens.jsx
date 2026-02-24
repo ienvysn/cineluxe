@@ -30,10 +30,8 @@ import {
   AlertDialogTitle,
 } from "../../components/ui/alert-dialog";
 import { toast } from "sonner";
-import { screens as initialScreens } from "../../data/mockData";
 import { Badge } from "../../components/ui/badge";
 import { screenService } from "../../services/screenService";
-
 
 const AdminScreens = () => {
   const [screenList, setScreenList] = useState([]);
@@ -59,7 +57,7 @@ const AdminScreens = () => {
         description: "Could not load screens from server.",
       });
       // Fallback to initialScreens if fetch fails totally or for development
-      setScreenList(initialScreens);
+      setScreenList([]);
     } finally {
       setLoading(false);
     }
@@ -270,6 +268,7 @@ const AdminScreens = () => {
 
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col rounded-[40px] border-white/5 bg-[#070707] p-0 overflow-hidden shadow-2xl">
+          <DialogTitle className="sr-only">Screen Configuration</DialogTitle>
           <div className="grid grid-cols-1 lg:grid-cols-2 h-full overflow-hidden">
             <div className="bg-[#0A0A0A] p-10 border-r border-white/5 flex flex-col h-full overflow-hidden">
               <div className="flex items-center gap-4 mb-10">

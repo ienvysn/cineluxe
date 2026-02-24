@@ -28,6 +28,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogTitle,
 } from "../../components/ui/dialog";
 import { cn, getPosterUrl } from "../../lib/utils";
 import { bookingService } from "../../services/bookingService";
@@ -391,6 +392,7 @@ const AdminBookings = () => {
 
       <Dialog open={isDetailDialogOpen} onOpenChange={setIsDetailDialogOpen}>
         <DialogContent className="max-w-2xl rounded-[40px] border-white/5 bg-[#070707] shadow-2xl p-0 overflow-hidden">
+          <DialogTitle className="sr-only">Booking Details</DialogTitle>
           {selectedBooking && selectedBooking.showtime && selectedBooking.showtime.movie && (
             <>
               <div className="bg-[#0A0A0A] p-10 border-b border-white/5 flex flex-col md:flex-row items-center gap-8">

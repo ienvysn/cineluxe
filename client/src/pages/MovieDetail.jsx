@@ -6,31 +6,37 @@ import { MovieHero } from "../components/movie/MovieHero";
 import { ShowtimeList } from "../components/movie/ShowtimeList";
 import { DateFilter } from "../components/movies/DateFilter";
 import { getPosterUrl } from "../lib/utils";
-import { pricing } from "../data/mockData";
+import { pricingService } from "../services/pricingService";
 
 const MovieDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const today = new Date().toISOString().split("T")[0];
-  const [selectedDate, setSelectedDate] = useState(location.state?.date || today);
+  const [selectedDate, setSelectedDate] = useState(
+    location.state?.date || today,
+  );
   const [movie, setMovie] = useState(null);
+  const [pricing, setPricing] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchMovie = async () => {
+    const fetchMovieData = async () => {
       try {
-        const data = await movieService.getMovieById(id);
-        if (data) {
-          setMovie(data);
-        }
+        const [movieData, pricingData] = await Promise.all([
+          movieService.getMovieById(id),
+          pricingService.getPricing()
+        ]);
+
+        if (movieData) setMovie(movieData);
+        if (pricingData) setPricing(pricingData);
       } catch (error) {
-        console.error("Failed to fetch movie:", error);
+        console.error("Failed to fetch movie details:", error);
       } finally {
         setIsLoading(false);
       }
     };
-    fetchMovie();
+    fetchMovieData();
   }, [id]);
 
   if (isLoading && !movie) {
@@ -65,6 +71,7 @@ const MovieDetail = () => {
   }
 
   const isDiscountDay = () => {
+    if (!pricing || !pricing.discountDays) return false;
     const date = new Date(selectedDate);
     return pricing.discountDays.includes(date.getDay());
   };
@@ -77,9 +84,9 @@ const MovieDetail = () => {
         isDiscountDay={isDiscountDay()}
       />
 
-      <div className="container mx-auto px-4 -mt-10 relative z-20">
+      <div className="container mx-auto px-4 -mt-10 relative z-20 overflow-hidden">
         {/* Date Selection Control */}
-        <div className="flex flex-col items-center mb-16">
+        <div className="flex flex-col items-center mb-16 w-full max-w-full overflow-hidden">
           <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl mb-6 shadow-2xl">
             <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
             <span className="text-[10px] uppercase font-bold tracking-[3px] text-primary">

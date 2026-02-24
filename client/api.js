@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const BASE_URL = "http://localhost:5000/api";
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const BASE_URL = `${API_BASE}/api`;
 
 export const apiCall = async (method, endpoint, options = {}) => {
   const { data, params, headers } = options;
@@ -27,12 +28,19 @@ export const apiCall = async (method, endpoint, options = {}) => {
   } catch (error) {
     console.error("API Error:", error.message);
 
-    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+    if (
+      error.response &&
+      (error.response.status === 401 || error.response.status === 403)
+    ) {
       localStorage.removeItem("cineluxe_token");
       localStorage.removeItem("cineluxe_user");
       window.location.href = "/auth";
       throw new Error("Session expired. Please login again.");
-    } else if (error.response && error.response.data && error.response.data.error) {
+    } else if (
+      error.response &&
+      error.response.data &&
+      error.response.data.error
+    ) {
       throw new Error(error.response.data.error);
     } else if (error.response) {
       throw new Error(error.response.statusText || "Something went wrong");
@@ -43,5 +51,3 @@ export const apiCall = async (method, endpoint, options = {}) => {
     }
   }
 };
-
-
