@@ -8,11 +8,11 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Film, Mail, Lock, User, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
-import { loginSchema, registerSchema } from "../lib/schemas";
+import { loginSchema, registerSchema, forgotPasswordSchema } from "../lib/schemas";
 import { apiCall } from "../../api";
 
 const AuthPage = () => {
-  const [isLogin, setIsLogin] = useState(true);
+  const [authMode, setAuthMode] = useState("login"); // login, signup, forgot
   const navigate = useNavigate();
 
   const {
@@ -21,12 +21,18 @@ const AuthPage = () => {
     formState: { errors },
     reset,
   } = useForm({
-    resolver: zodResolver(isLogin ? loginSchema : registerSchema),
+    resolver: zodResolver(
+      authMode === "login"
+        ? loginSchema
+        : authMode === "signup"
+        ? registerSchema
+        : forgotPasswordSchema
+    ),
   });
 
   const onSubmit = async (data) => {
     try {
-      if (isLogin) {
+      if (authMode === "login") {
         // Handle Login
         const response = await apiCall("POST", "/users/login", { data });
         console.log("Login Response:", response);
@@ -42,7 +48,7 @@ const AuthPage = () => {
         } else {
           navigate("/");
         }
-      } else {
+      } else if (authMode === "signup") {
         // Handle Signup
         console.log("Signup started");
         const response = await apiCall("POST", "/users/signup", { data });
@@ -55,17 +61,32 @@ const AuthPage = () => {
         });
 
         navigate("/");
+      } else if (authMode === "forgot") {
+        // Handle Forgot Password
+        await apiCall("POST", "/users/forgot-password", { data });
+        toast.success("Reset code sent!", {
+          description: "Check your email for the 6-digit confirmation code.",
+        });
+        navigate("/reset-password", { state: { email: data.email } });
       }
     } catch (error) {
       console.error("Auth error:", error);
-      toast.error(isLogin ? "Login Failed" : "Signup Failed", {
-        description: error.message || "An error occurred during authentication",
-      });
+      toast.error(
+        authMode === "login"
+          ? "Login Failed"
+          : authMode === "signup"
+          ? "Signup Failed"
+          : "Request Failed",
+        {
+          description:
+            error.message || "An error occurred during authentication",
+        }
+      );
     }
   };
 
-  const handleToggleMode = () => {
-    setIsLogin(!isLogin);
+  const handleToggleMode = (mode) => {
+    setAuthMode(mode);
     reset();
   };
 
@@ -147,17 +168,23 @@ const AuthPage = () => {
 
           <div>
             <h2 className="font-display text-4xl font-bold text-foreground mb-3">
-              {isLogin ? "Welcome back" : "Create account"}
+              {authMode === "login"
+                ? "Welcome back"
+                : authMode === "signup"
+                ? "Create account"
+                : "Reset Password"}
             </h2>
             <p className="text-muted-foreground">
-              {isLogin
+              {authMode === "login"
                 ? "Sign in to access your bookings"
-                : "Join us for a premium cinema experience"}
+                : authMode === "signup"
+                ? "Join us for a premium cinema experience"
+                : "Enter your email to receive a reset code"}
             </p>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-            {!isLogin && (
+            {authMode === "signup" && (
               <div className="space-y-2">
                 <Label htmlFor="fullName">Full Name</Label>
                 <div className="relative group">
@@ -196,36 +223,39 @@ const AuthPage = () => {
               )}
             </div>
 
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <Label htmlFor="password">Password</Label>
-                {isLogin && (
-                  <button
-                    type="button"
-                    className="text-xs text-primary hover:underline"
-                  >
-                    Forgot password?
-                  </button>
+            {authMode !== "forgot" && (
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <Label htmlFor="password">Password</Label>
+                  {authMode === "login" && (
+                    <button
+                      type="button"
+                      onClick={() => handleToggleMode("forgot")}
+                      className="text-xs text-primary hover:underline"
+                    >
+                      Forgot password?
+                    </button>
+                  )}
+                </div>
+                <div className="relative group">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="••••••••"
+                    className="pl-11 bg-card/50 border-white/5 focus:border-primary/50"
+                    {...register("password")}
+                  />
+                </div>
+                {errors.password && (
+                  <p className="text-xs text-destructive mt-1 ml-1">
+                    {errors.password.message}
+                  </p>
                 )}
               </div>
-              <div className="relative group">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  className="pl-11 bg-card/50 border-white/5 focus:border-primary/50"
-                  {...register("password")}
-                />
-              </div>
-              {errors.password && (
-                <p className="text-xs text-destructive mt-1 ml-1">
-                  {errors.password.message}
-                </p>
-              )}
-            </div>
+            )}
 
-            {!isLogin && (
+            {authMode === "signup" && (
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">Confirm Password</Label>
                 <div className="relative group">
@@ -252,7 +282,11 @@ const AuthPage = () => {
               size="xl"
               className="w-full mt-2"
             >
-              {isLogin ? "Sign In" : "Create Account"}
+              {authMode === "login"
+                ? "Sign In"
+                : authMode === "signup"
+                ? "Create Account"
+                : "Send Reset Code"}
             </Button>
           </form>
 
@@ -296,14 +330,37 @@ const AuthPage = () => {
           </Button>
 
           <p className="text-center text-sm text-muted-foreground mt-6">
-            {isLogin ? "New to CineLuxe?" : "Already have an account?"}{" "}
-            <button
-              type="button"
-              onClick={handleToggleMode}
-              className="text-primary hover:text-gold-light underline underline-offset-4 font-semibold transition-colors"
-            >
-              {isLogin ? "Create one now" : "Sign in here"}
-            </button>
+            {authMode === "login" ? (
+              <>
+                New to CineLuxe?{" "}
+                <button
+                  type="button"
+                  onClick={() => handleToggleMode("signup")}
+                  className="text-primary hover:text-gold-light underline underline-offset-4 font-semibold transition-colors"
+                >
+                  Create one now
+                </button>
+              </>
+            ) : authMode === "signup" ? (
+              <>
+                Already have an account?{" "}
+                <button
+                  type="button"
+                  onClick={() => handleToggleMode("login")}
+                  className="text-primary hover:text-gold-light underline underline-offset-4 font-semibold transition-colors"
+                >
+                  Sign in here
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={() => handleToggleMode("login")}
+                className="text-primary hover:text-gold-light underline underline-offset-4 font-semibold transition-colors"
+              >
+                Back to Sign In
+              </button>
+            )}
           </p>
         </div>
       </div>

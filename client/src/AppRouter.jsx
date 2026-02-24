@@ -14,6 +14,7 @@ import MyBookings from "./pages/MyBookings";
 import BookingConfirmation from "./pages/BookingConfirmation";
 import BookingPage from "./pages/BookingPage";
 import PaymentPage from "./pages/PaymentPage";
+import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import AdminLayout from "./components/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -63,6 +64,7 @@ const AppRouter = () => {
           }
         />
         <Route path="/auth" element={<AuthPage />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route
           path="/movie/:id"
           element={

@@ -139,4 +139,61 @@ const sendBookingConfirmation = async (userEmail, bookingDetails) => {
   }
 };
 
-module.exports = { sendBookingConfirmation };
+const sendResetPasswordEmail = async (userEmail, resetCode) => {
+  const mailOptions = {
+    from: `"CineLuxe Security" <${process.env.EMAIL_USER}>`,
+    to: userEmail,
+    subject: "Reset Your CineLuxe Password",
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Password Reset</title>
+        <style>
+          @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap');
+          body { margin: 0; padding: 0; background-color: #050505; font-family: 'Lato', sans-serif; color: #e0e0e0; }
+          .container { max-width: 600px; margin: 40px auto; background-color: #0a0a0a; border: 1px solid #1a1a1a; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+          .header { background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%); padding: 40px 20px; text-align: center; border-bottom: 2px solid #d4af37; }
+          .logo { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700; color: #fff; letter-spacing: 2px; text-transform: uppercase; margin: 0; }
+          .logo span { color: #d4af37; }
+          .content { padding: 40px; text-align: center; }
+          .greeting { font-family: 'Playfair Display', serif; font-size: 24px; color: #fff; margin-bottom: 20px; }
+          .message { color: #aaa; line-height: 1.6; margin-bottom: 30px; }
+          .code-box { background-color: #111; border: 1px dashed #d4af37; color: #d4af37; padding: 20px; font-family: 'Playfair Display', serif; font-size: 36px; letter-spacing: 10px; font-weight: 700; margin: 30px 0; border-radius: 8px; }
+          .expiry { font-size: 12px; color: #666; font-style: italic; }
+          .footer { background-color: #000; padding: 30px; text-align: center; font-size: 12px; color: #444; border-top: 1px solid #1a1a1a; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1 class="logo">Cine<span>Luxe</span></h1>
+          </div>
+          <div class="content">
+            <h2 class="greeting">Password Reset Request</h2>
+            <p class="message">We received a request to reset your password. Use the code below to proceed. If you didn't request this, you can safely ignore this email.</p>
+            <div class="code-box">${resetCode}</div>
+            <p class="expiry">This code will expire in 10 minutes.</p>
+          </div>
+          <div class="footer">
+            <p>&copy; ${new Date().getFullYear()} CineLuxe. All rights reserved.</p>
+            <p>If you have any questions, contact our support team.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log("Reset password email sent to:", userEmail);
+    return true;
+  } catch (error) {
+    console.error("Error sending reset email:", error);
+    return false;
+  }
+};
+
+module.exports = { sendBookingConfirmation, sendResetPasswordEmail };

@@ -1,6 +1,8 @@
 const bcrypt = require("bcrypt");
 const { generateToken } = require("../utils/jwtUtils");
 const User = require("../models/userModel");
+const redisClient = require("../utils/redisClient");
+const { sendResetPasswordEmail } = require("../utils/emailService");
 const { OAuth2Client } = require("google-auth-library");
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -151,4 +153,59 @@ const getProfile = async (req, res) => {
   }
 };
 
-module.exports = { signup, login, getProfile, googleLogin };
+const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ where: { email } });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Generate 6-digit code
+    const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Store in Redis with 10 min expiry
+    await redisClient.set(`reset:${email}`, resetCode, {
+      EX: 600,
+    });
+
+    await sendResetPasswordEmail(email, resetCode);
+
+    res.status(200).json({ message: "Reset code sent to your email" });
+  } catch (error) {
+    console.error("Forgot password error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const resetPassword = async (req, res) => {
+  try {
+    const { email, code, password } = req.body;
+
+    const storedCode = await redisClient.get(`reset:${email}`);
+
+    if (!storedCode || storedCode !== code) {
+      return res.status(400).json({ error: "Invalid or expired reset code" });
+    }
+
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const password_hash = await bcrypt.hash(password, 10);
+    user.password_hash = password_hash;
+    await user.save();
+
+    // Delete code from Redis after successful reset
+    await redisClient.del(`reset:${email}`);
+
+    res.status(200).json({ message: "Password reset successful" });
+  } catch (error) {
+    console.error("Reset password error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+module.exports = { signup, login, getProfile, googleLogin, forgotPassword, resetPassword };
