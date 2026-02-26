@@ -28,9 +28,15 @@ export const apiCall = async (method, endpoint, options = {}) => {
   } catch (error) {
     console.error("API Error:", error.message);
 
+    const skipAuthRedirect = endpoint.includes("/users/login") ||
+                             endpoint.includes("/users/signup") ||
+                             endpoint.includes("/users/forgot-password") ||
+                             endpoint.includes("/bookings/validate");
+
     if (
       error.response &&
-      (error.response.status === 401 || error.response.status === 403)
+      (error.response.status === 401 || error.response.status === 403) &&
+      !skipAuthRedirect
     ) {
       localStorage.removeItem("cineluxe_token");
       localStorage.removeItem("cineluxe_user");

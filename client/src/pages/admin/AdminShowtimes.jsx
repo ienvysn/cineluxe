@@ -143,9 +143,20 @@ const AdminShowtimes = () => {
           price: formData.price,
         });
 
-        toast.success('Showtimes Added', {
-          description: `Added ${result.created} new showtime(s) to the schedule.`,
-        });
+        if (result.skipped > 0 && result.created === 0) {
+          // If no showtimes were created due to overlaps, throw an error to keep the dialog open
+          throw new Error(result.errors?.[0]?.message || "Showtimes overlapped with existing ones.");
+        }
+
+        if (result.skipped > 0) {
+          toast.warning('Partial Success', {
+            description: `Added ${result.created} showtime(s). Skipped ${result.skipped} due to overlaps.`,
+          });
+        } else {
+          toast.success('Showtimes Added', {
+            description: `Added ${result.created} new showtime(s) to the schedule.`,
+          });
+        }
       }
 
       setIsAddDialogOpen(false);
